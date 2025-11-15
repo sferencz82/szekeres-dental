@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4f7fb" />
+      <stop offset="100%" stop-color="#d9e4f2" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#grad)" rx="16" />
+  <g fill="none" stroke="#1a4d7a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 60c0-30 160-30 160 0 0 24-20 44-40 44 0 56-80 56-80 0-20 0-40-20-40-44z" />
+    <path d="M120 104v48" />
+    <path d="M200 104v48" />
+    <path d="M160 110c0 20-8 40-24 56" />
+    <path d="M160 110c0 20 8 40 24 56" />
+  </g>
+  <text x="50%" y="180" font-size="24" font-family="'Segoe UI', Arial, sans-serif" fill="#1a4d7a" text-anchor="middle">
+    Implantátum
+  </text>
+</svg>

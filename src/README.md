@@ -1,19 +1,16 @@
 # Frontend (src/)
 
-React + TypeScript single-page application intended to run inside a Vite project. It renders the marketing site, handles smooth
-scrolling between sections, and calls the backend for booking/contact actions via [`src/api.ts`](./api.ts).
+React + TypeScript single-page application that ships alongside the Vite scaffold stored at the repository root. It renders the
+marketing site, handles smooth scrolling between sections, and calls the backend for booking/contact actions via [`src/api.ts`](./api.ts).
 
 ## Prerequisites
 
 - Node.js 18+
 - npm 9+
-- A Vite React + TypeScript scaffold (`npm create vite@latest szekeres-dental -- --template react-ts`)
-
 ## Installation
 
-1. Ensure you are at the Vite project root (the directory that contains `package.json`, `vite.config.ts`, etc.).
-2. Copy or replace the default `src/` folder with the contents of this directory.
-3. Install dependencies (from the Vite root):
+1. Ensure you are at the repository root (the directory that contains `package.json`, `vite.config.ts`, etc.).
+2. Install dependencies:
 
    ```bash
    npm install

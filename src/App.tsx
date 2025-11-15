@@ -24,13 +24,13 @@ const App: React.FC = () => {
         title: 'Implantológia',
         description:
           'Digitálisan tervezett, prémium implantátum rendszerek, látványtervekkel és gyors gyógyulással.',
-        image: '/assets/implant-single.png',
+        image: '/assets/implant-single.svg',
       },
       {
         title: 'Fogpótlások, koronák, hidak',
         description:
           'CAD/CAM technológiával készített, tartós és esztétikus megoldások hiányzó fogak pótlására.',
-        image: '/assets/all-on-4.png',
+        image: '/assets/all-on-4.svg',
       },
       {
         title: 'Szájhigiénés kezelések, fogkőeltávolítás',
@@ -74,7 +74,7 @@ const App: React.FC = () => {
       <header className="site-header">
         <nav className="navbar">
           <div className="navbar__logo" onClick={() => handleNavClick('hero')}>
-            <img src="/assets/szekeres-logo.png" alt="Szekeres Dental logó" />
+            <img src="/assets/szekeres-logo.svg" alt="Szekeres Dental logó" />
           </div>
           <div className="navbar__links">
             <button type="button" onClick={() => handleNavClick('about')}>
@@ -122,7 +122,7 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="hero__image">
-              <img src="/assets/clinic-hero.jpg" alt="Szekeres Dental rendelő" />
+              <img src="/assets/clinic-hero.svg" alt="Szekeres Dental rendelő" />
             </div>
           </div>
         </section>
@@ -152,7 +152,7 @@ const App: React.FC = () => {
               </ul>
             </div>
             <div className="about__image">
-              <img src="/assets/dr-szekeres.jpg" alt="Dr. Szekeres Ferenc" />
+              <img src="/assets/dr-szekeres.svg" alt="Dr. Szekeres Ferenc" />
             </div>
           </div>
         </section>
@@ -257,7 +257,7 @@ const App: React.FC = () => {
 
       <footer className="site-footer">
         <div className="footer__content">
-          <img src="/assets/szekeres-logo.png" alt="Szekeres Dental logó" />
+          <img src="/assets/szekeres-logo.svg" alt="Szekeres Dental logó" />
           <p>© {new Date().getFullYear()} Szekeres Dental – esztétikai fogászat & szájsebészet Székesfehérváron.</p>
           <p className="footer__powered">
             Online időpontfoglalás: próba üzemmód – a rendelő visszaigazolása szükséges.
