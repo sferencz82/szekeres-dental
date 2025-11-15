@@ -9,7 +9,7 @@ const appointmentsRouter = Router();
 // you would persist these records in a database such as PostgreSQL or MongoDB
 // by replacing this array with data-access functions that insert and query
 // records through an ORM or query builder.
-const bookingRequests: BookingRequest[] = [];
+export const bookingRequests: BookingRequest[] = [];
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
