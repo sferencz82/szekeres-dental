@@ -1,14 +1,5 @@
 import React, { useMemo, useState } from 'react';
-
-type BookingFormData = {
-  fullName: string;
-  email: string;
-  phone: string;
-  treatment: string;
-  date: string;
-  time: string;
-  notes: string;
-};
+import BookingSection from './BookingSection';
 
 type ContactFormData = {
   name: string;
@@ -20,18 +11,6 @@ type ContactFormData = {
 };
 
 const App: React.FC = () => {
-  const [bookingData, setBookingData] = useState<BookingFormData>({
-    fullName: '',
-    email: '',
-    phone: '',
-    treatment: '',
-    date: '',
-    time: '',
-    notes: '',
-  });
-
-  const [bookingSuccess, setBookingSuccess] = useState<string>('');
-
   const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -102,8 +81,6 @@ const App: React.FC = () => {
     { name: 'Gyökércsúcs rezekció', price: '95 000 Ft-tól', note: 'Sebészeti kezelés, varratokkal' },
   ];
 
-  const timeSlots = ['08:30', '09:00', '09:30', '10:00', '11:30', '13:30', '15:00', '16:00'];
-
   const handleNavClick = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -111,27 +88,8 @@ const App: React.FC = () => {
     }
   };
 
-  const handleBookingChange = (field: keyof BookingFormData, value: string) => {
-    setBookingData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleContactChange = (field: keyof ContactFormData, value: string) => {
     setContactData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleBookingSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log('Booking form data:', bookingData);
-    setBookingSuccess('Köszönjük megkeresését! Kollégáink hamarosan felveszik Önnel a kapcsolatot.');
-    setBookingData({
-      fullName: '',
-      email: '',
-      phone: '',
-      treatment: '',
-      date: '',
-      time: '',
-      notes: '',
-    });
   };
 
   const handleContactSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -329,101 +287,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        <section id="booking" className="section booking">
-          <div className="section__header">
-            <h2>Időpontfoglalás</h2>
-            <p>Töltse ki űrlapunkat, kollégáink egy munkanapon belül visszahívják.</p>
-          </div>
-          <form className="form" onSubmit={handleBookingSubmit}>
-            <div className="form__grid">
-              <label>
-                Teljes név
-                <input
-                  type="text"
-                  name="fullName"
-                  value={bookingData.fullName}
-                  onChange={(e) => handleBookingChange('fullName', e.target.value)}
-                  required
-                />
-              </label>
-              <label>
-                E-mail cím
-                <input
-                  type="email"
-                  name="email"
-                  value={bookingData.email}
-                  onChange={(e) => handleBookingChange('email', e.target.value)}
-                  required
-                />
-              </label>
-              <label>
-                Telefonszám
-                <input
-                  type="tel"
-                  name="phone"
-                  value={bookingData.phone}
-                  onChange={(e) => handleBookingChange('phone', e.target.value)}
-                  required
-                />
-              </label>
-              <label>
-                Választott kezelés
-                <select
-                  name="treatment"
-                  value={bookingData.treatment}
-                  onChange={(e) => handleBookingChange('treatment', e.target.value)}
-                  required
-                >
-                  <option value="">Válasszon...</option>
-                  {services.map((service) => (
-                    <option key={service.title} value={service.title}>
-                      {service.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Dátum
-                <input
-                  type="date"
-                  name="date"
-                  value={bookingData.date}
-                  onChange={(e) => handleBookingChange('date', e.target.value)}
-                  required
-                />
-              </label>
-              <label>
-                Időpont
-                <select
-                  name="time"
-                  value={bookingData.time}
-                  onChange={(e) => handleBookingChange('time', e.target.value)}
-                  required
-                >
-                  <option value="">Válasszon időpontot...</option>
-                  {timeSlots.map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <label>
-              Megjegyzés (opcionális)
-              <textarea
-                name="notes"
-                value={bookingData.notes}
-                onChange={(e) => handleBookingChange('notes', e.target.value)}
-                rows={4}
-              />
-            </label>
-            <button className="btn btn-primary" type="submit">
-              Időpontot kérek
-            </button>
-            {bookingSuccess && <p className="form__success">{bookingSuccess}</p>}
-          </form>
-        </section>
+        <BookingSection />
 
         <section id="contact" className="section contact">
           <div className="section__header">
