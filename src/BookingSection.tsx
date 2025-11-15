@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { postJson } from './api';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getJson, postJson } from './api';
 
 export interface BookingFormValues {
   fullName: string;
@@ -13,6 +13,11 @@ export interface BookingFormValues {
 
 interface BookingSectionProps {
   onSubmitSuccess?: () => void;
+}
+
+interface AvailabilityResponse {
+  date: string;
+  slots: string[];
 }
 
 const initialFormValues: BookingFormValues = {
@@ -30,11 +35,9 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
-
-  const timeSlots = useMemo(
-    () => ['08:30', '09:00', '09:30', '10:00', '10:30', '11:30', '13:30', '15:00', '16:00', '17:00'],
-    []
-  );
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string>('');
 
   const treatmentOptions = useMemo(
     () => [
@@ -51,8 +54,57 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   );
 
   const handleChange = (field: keyof BookingFormValues, value: string) => {
-    setFormValues((prev) => ({ ...prev, [field]: value }));
+    setFormValues((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === 'date' ? { time: '' } : {}),
+    }));
   };
+
+  useEffect(() => {
+    if (!formValues.date) {
+      setAvailableSlots([]);
+      setAvailabilityError('');
+      setIsLoadingAvailability(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    let isActive = true;
+
+    setIsLoadingAvailability(true);
+    setAvailabilityError('');
+
+    getJson<AvailabilityResponse>(`/api/availability?date=${formValues.date}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!isActive) {
+          return;
+        }
+        setAvailableSlots(response.slots);
+      })
+      .catch((error) => {
+        if (!isActive || (error as DOMException)?.name === 'AbortError') {
+          return;
+        }
+        console.error('Failed to fetch availability', error);
+        setAvailabilityError(
+          'Nem sikerült betölteni az elérhető időpontokat. Kérjük, próbálja meg később vagy válasszon másik dátumot.'
+        );
+        setAvailableSlots([]);
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoadingAvailability(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [formValues.date]);
 
   const validateForm = (): string | null => {
     if (!formValues.fullName.trim()) {
@@ -80,11 +132,33 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     if (selectedDate < today) {
       return 'A kiválasztott dátum nem lehet a múltban.';
     }
+    if (isLoadingAvailability) {
+      return 'Kérjük, várja meg, amíg betöltjük az elérhető időpontokat.';
+    }
+    if (availabilityError) {
+      return 'Az időpontok betöltése sikertelen volt. Kérjük, válasszon új dátumot vagy próbálja meg később.';
+    }
     if (!formValues.time) {
       return 'Kérjük, válasszon időpontot.';
     }
+    if (availableSlots.length > 0 && !availableSlots.includes(formValues.time)) {
+      return 'A kiválasztott időpont már nem érhető el. Kérjük, válasszon másikat.';
+    }
     return null;
   };
+
+  const timeSelectPlaceholder = !formValues.date
+    ? 'Válasszon dátumot először...'
+    : isLoadingAvailability
+    ? 'Időpontok betöltése...'
+    : availabilityError
+    ? 'Nem sikerült betölteni az időpontokat'
+    : availableSlots.length === 0
+    ? 'Nincs elérhető időpont erre a napra'
+    : 'Válasszon időpontot...';
+
+  const isTimeSelectDisabled =
+    !formValues.date || isLoadingAvailability || !!availabilityError || availableSlots.length === 0;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -185,14 +259,22 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
               value={formValues.time}
               onChange={(event) => handleChange('time', event.target.value)}
               required
+              disabled={isTimeSelectDisabled}
             >
-              <option value="">Válasszon időpontot...</option>
-              {timeSlots.map((slot) => (
+              <option value="" disabled>
+                {timeSelectPlaceholder}
+              </option>
+              {availableSlots.map((slot) => (
                 <option key={slot} value={slot}>
                   {slot}
                 </option>
               ))}
             </select>
+            {availabilityError && (
+              <p className="form__error" role="alert">
+                {availabilityError}
+              </p>
+            )}
           </label>
         </div>
         <label>

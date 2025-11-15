@@ -40,3 +40,25 @@ export async function postJson<TBody, TResponse = unknown>(
 
   return (await response.text()) as unknown as TResponse;
 }
+
+export async function getJson<TResponse = unknown>(
+  path: string,
+  init?: RequestInit
+): Promise<TResponse> {
+  const response = await fetch(buildUrl(path), {
+    ...init,
+    method: init?.method ?? 'GET',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(errorText || 'A kérés nem sikerült.');
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return (await response.json()) as TResponse;
+  }
+
+  return (await response.text()) as unknown as TResponse;
+}
