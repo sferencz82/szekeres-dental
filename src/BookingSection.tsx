@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { postJson } from './api';
 
 export interface BookingFormValues {
   fullName: string;
@@ -99,17 +100,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/appointments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formValues),
-      });
-
-      if (!response.ok) {
-        throw new Error('Sikertelen mentés');
-      }
+      await postJson('/api/appointments', formValues);
 
       setSuccessMessage(
         'Köszönjük! Időpontfoglalási igényét rögzítettük, kollégánk hamarosan felveszi Önnel a kapcsolatot.'
