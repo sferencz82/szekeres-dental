@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import contactRouter from './routes/contact';
 import appointmentsRouter from './routes/appointments';
+import availabilityRouter from './routes/availability';
 import { ApiResponse } from './types';
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.use('/api/contact', contactRouter);
 app.use('/api/appointments', appointmentsRouter);
+app.use('/api/availability', availabilityRouter);
 
 app.use(
   (
