@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120">
+  <rect width="320" height="120" rx="12" fill="#041e33" />
+  <text x="50%" y="45%" font-size="36" font-weight="600" font-family="'Segoe UI', Arial, sans-serif" fill="#ffffff" text-anchor="middle">
+    Szekeres
+  </text>
+  <text x="50%" y="75%" font-size="22" font-family="'Segoe UI', Arial, sans-serif" fill="#5fc4c8" text-anchor="middle" letter-spacing="4">
+    DENTAL
+  </text>
+  <path d="M90 90c20-20 120-20 140 0" fill="none" stroke="#5fc4c8" stroke-width="4" stroke-linecap="round" />
+  <circle cx="160" cy="30" r="6" fill="#5fc4c8" />
+</svg>

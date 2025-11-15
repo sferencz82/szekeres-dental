@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 360">
+  <rect width="320" height="360" rx="24" fill="#fff8ef" />
+  <circle cx="160" cy="120" r="70" fill="#f0c9a3" />
+  <circle cx="160" cy="110" r="58" fill="#f8dcc1" />
+  <rect x="80" y="200" width="160" height="140" rx="30" fill="#1b4965" />
+  <path d="M110 250h100" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
+  <path d="M130 220c20 20 40 20 60 0" stroke="#f8dcc1" stroke-width="6" stroke-linecap="round" />
+  <circle cx="135" cy="110" r="6" fill="#1b4965" />
+  <circle cx="185" cy="110" r="6" fill="#1b4965" />
+  <path d="M140 140c12 12 28 12 40 0" stroke="#d97a2b" stroke-width="5" stroke-linecap="round" />
+  <text x="50%" y="330" font-size="24" font-family="'Segoe UI', Arial, sans-serif" fill="#1b4965" text-anchor="middle">
+    Dr. Szekeres
+  </text>
+</svg>
