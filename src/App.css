@@ -612,6 +612,14 @@ main {
   color: #4f5e97;
 }
 
+.footer__logo {
+  width: 120px;
+  max-width: 50%;
+  margin: 0 auto 1.5rem;
+  display: block;
+  height: auto;
+}
+
 @media (max-width: 900px) {
   .navbar {
     flex-direction: column;
