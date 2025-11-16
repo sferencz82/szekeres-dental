@@ -350,7 +350,7 @@ const App: React.FC = () => {
 
       <footer className="site-footer">
         <div className="footer__content">
-          <img src="/assets/szekeres-logo2.png" alt="Szekeres Dental logó" />
+          <img className="footer__logo" src="/assets/szekeres-logo2.png" alt="Szekeres Dental logó" />
           <p>© {new Date().getFullYear()} Szekeres Dental – boutique fogszabályozó és esztétikai rendelő.</p>
           <p className="footer__powered">Az online foglalások a visszaigazolásunkig előzetes igénylésnek minősülnek.</p>
         </div>
