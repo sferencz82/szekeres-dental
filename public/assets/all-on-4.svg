@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#fef5f7" rx="16" />
+  <g fill="none" stroke="#a9275d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 120c20-60 220-60 240 0" />
+    <path d="M60 130c10-30 190-30 200 0" />
+    <path d="M80 140c10-20 150-20 160 0" />
+    <circle cx="80" cy="70" r="10" fill="#a9275d" />
+    <circle cx="160" cy="60" r="10" fill="#a9275d" />
+    <circle cx="240" cy="70" r="10" fill="#a9275d" />
+  </g>
+  <text x="50%" y="180" font-size="24" font-family="'Segoe UI', Arial, sans-serif" fill="#a9275d" text-anchor="middle">
+    All-on-4
+  </text>
+</svg>

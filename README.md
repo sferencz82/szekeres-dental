@@ -21,10 +21,12 @@ A marketing site and lightweight appointment API for the Szekeres Dental practic
 
 ### 2. Start the frontend
 
-1. Return to the project root that contains `package.json` and the Vite config for the React app.
-2. `npm install`
+The repository root now contains the complete Vite React + TypeScript project. All frontend commands should be executed from this directory (the one that contains `package.json` and `vite.config.ts`).
+
+1. `npm install`
+2. Copy `.env.example.frontend` to `.env` (or create `.env`) and set `VITE_API_BASE_URL` if your backend is not running on `http://localhost:4000`.
 3. `npm run dev`
-4. Open the Vite dev server URL (by default <http://localhost:5173>) and the site will proxy API requests to `http://localhost:4000`.
+4. Open the Vite dev server URL (by default <http://localhost:5173>). Requests to `/api/*` are proxied automatically to `http://localhost:4000`.
 
 > If you are using a different port for the backend, set `VITE_API_BASE_URL` in your frontend `.env` file (see [src/README.md](src/README.md)).
 
