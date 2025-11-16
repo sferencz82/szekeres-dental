@@ -104,14 +104,25 @@ const ContactSection: React.FC = () => {
           <div className="map">
             <iframe
               title="Szekeres Dental térkép"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d0!2d0!3d0"
+              src="https://www.google.com/maps?q=8000+Sz%C3%A9kesfeh%C3%A9rv%C3%A1r%2C+Budai+%C3%BAt+70&output=embed"
               width="100%"
               height="250"
               loading="lazy"
               style={{ border: 0 }}
               allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
             ></iframe>
-            {/* TODO: Update the map embed with the clinic's exact location */}
+            <p className="map__caption">
+              A térkép a rendelő pontos helyét mutatja. Ha nem tölt be, nyissa meg a{' '}
+              <a
+                href="https://www.google.com/maps/place/8000+Sz%C3%A9kesfeh%C3%A9rv%C3%A1r,+Budai+%C3%BAt+70/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google Térképen
+              </a>
+              .
+            </p>
           </div>
         </div>
         <div className="contact__form-wrapper">
