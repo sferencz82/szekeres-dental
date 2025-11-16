@@ -1,0 +1,18 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="crown" x1="30" y1="0" x2="190" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F7FF" />
+      <stop offset="0.5" stop-color="#A8D8FF" />
+      <stop offset="1" stop-color="#546CFF" />
+    </linearGradient>
+  </defs>
+  <rect width="220" height="220" rx="50" fill="url(#crown)" opacity="0.12" />
+  <path
+    d="M50 90L80 60L110 95L140 60L170 90L160 150H60L50 90Z"
+    fill="url(#crown)"
+    opacity="0.9"
+  />
+  <circle cx="80" cy="60" r="12" fill="#E5FBFF" />
+  <circle cx="140" cy="60" r="12" fill="#E5FBFF" opacity="0.7" />
+  <path d="M70 150H150" stroke="#E5FBFF" stroke-width="10" stroke-linecap="round" opacity="0.4" />
+</svg>

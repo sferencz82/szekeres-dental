@@ -1,0 +1,16 @@
+<svg width="220" height="260" viewBox="0 0 220 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shield" x1="0" y1="0" x2="220" y2="260" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#88E2FF" />
+      <stop offset="0.5" stop-color="#6CB5FF" />
+      <stop offset="1" stop-color="#4A4CFF" />
+    </linearGradient>
+  </defs>
+  <rect width="220" height="260" rx="70" fill="url(#shield)" opacity="0.1" />
+  <path
+    d="M110 40L60 60V130C60 170 85 210 110 220C135 210 160 170 160 130V60L110 40Z"
+    fill="url(#shield)"
+    opacity="0.9"
+  />
+  <path d="M85 130L105 150L140 105" stroke="#E5FBFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

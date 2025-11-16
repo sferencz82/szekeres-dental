@@ -1,0 +1,26 @@
+<svg width="320" height="220" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="aligner" x1="10" y1="0" x2="300" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#99F0FF" />
+      <stop offset="0.5" stop-color="#6CB5FF" />
+      <stop offset="1" stop-color="#5E6CFF" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="320" height="220" rx="50" fill="url(#aligner)" opacity="0.15" />
+  <path
+    d="M40 90C40 90 80 40 160 40C240 40 280 90 280 90C280 90 240 140 160 140C80 140 40 90 40 90Z"
+    stroke="url(#aligner)"
+    stroke-width="18"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.9"
+  />
+  <path
+    d="M65 95C65 95 95 60 160 60C225 60 255 95 255 95C255 95 225 130 160 130C95 130 65 95 65 95Z"
+    stroke="#E5FBFF"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.6"
+  />
+</svg>

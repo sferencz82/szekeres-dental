@@ -1,0 +1,19 @@
+<svg width="220" height="260" viewBox="0 0 220 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="implant" x1="20" y1="0" x2="200" y2="260" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B9F4FF" />
+      <stop offset="0.5" stop-color="#6CC2FF" />
+      <stop offset="1" stop-color="#4E68FF" />
+    </linearGradient>
+  </defs>
+  <rect width="220" height="260" rx="60" fill="url(#implant)" opacity="0.1" />
+  <path
+    d="M70 60H150V120C150 150 130 190 110 210C90 190 70 150 70 120V60Z"
+    fill="url(#implant)"
+    opacity="0.9"
+  />
+  <rect x="80" y="30" width="60" height="20" rx="10" fill="#E5FBFF" opacity="0.4" />
+  <path d="M90 140L130 140" stroke="#E5FBFF" stroke-width="10" stroke-linecap="round" />
+  <path d="M90 165L130 165" stroke="#E5FBFF" stroke-width="10" stroke-linecap="round" opacity="0.7" />
+  <path d="M95 190L125 190" stroke="#E5FBFF" stroke-width="8" stroke-linecap="round" opacity="0.5" />
+</svg>

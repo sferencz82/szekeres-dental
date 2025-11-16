@@ -1,0 +1,28 @@
+<svg width="560" height="240" viewBox="0 0 560 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="before" x1="0" y1="0" x2="260" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1C3A7A" />
+      <stop offset="1" stop-color="#5C6CFF" />
+    </linearGradient>
+    <linearGradient id="after" x1="300" y1="0" x2="560" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6CD0FF" />
+      <stop offset="1" stop-color="#7C4CFF" />
+    </linearGradient>
+  </defs>
+  <rect width="260" height="240" rx="32" fill="url(#before)" opacity="0.85" />
+  <rect x="300" width="260" height="240" rx="32" fill="url(#after)" opacity="0.85" />
+  <path
+    d="M50 150C50 150 80 190 130 190C180 190 210 150 210 150"
+    stroke="#F5FBFF"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+  <path
+    d="M350 120C350 120 390 170 450 170C510 170 530 120 530 120"
+    stroke="#F5FBFF"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+  <text x="80" y="60" fill="#E7F7FF" font-size="24" font-family="Inter, sans-serif">Before</text>
+  <text x="370" y="60" fill="#FDFDFF" font-size="24" font-family="Inter, sans-serif">After</text>
+</svg>
