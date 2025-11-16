@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import BookingSection from './BookingSection';
 import ContactSection from './ContactSection';
 
@@ -6,61 +6,103 @@ const App: React.FC = () => {
   const services = useMemo(
     () => [
       {
-        title: 'Esztétikai fogászat',
-        description:
-          'Prémium minőségű restaurációk és mosolytervezés a természetes, harmonikus megjelenésért.',
+        title: 'Aesthetic dentistry',
+        description: 'Smile design, porcelain veneers and color harmonizing restorations tailored to every patient.',
+        icon: '✨',
       },
       {
-        title: 'Bölcsességfog műtétek',
-        description:
-          'Kíméletes, korszerű technikákkal végzett eltávolítás, biztonságos gyógyulási folyamattal.',
+        title: 'Orthodontics',
+        description: 'Aligner-based treatments and discreet braces for confident, healthy alignment.',
+        icon: '🪥',
       },
       {
-        title: 'Gyökércsúcs rezekciók',
-        description:
-          'Tapasztalt szájsebészeti háttérrel, mikroszkópos támogatással kezeljük a makacs gyulladásokat.',
+        title: 'Implantology',
+        description: 'Digitally planned implants, immediate load solutions and premium abutments.',
+        icon: '🦷',
       },
       {
-        title: 'Implantológia',
-        description:
-          'Digitálisan tervezett, prémium implantátum rendszerek, látványtervekkel és gyors gyógyulással.',
-        image: '/assets/implant-single.svg',
+        title: 'Whitening',
+        description: 'Gentle in-office whitening protocols with lasting luminosity and zero sensitivity.',
+        icon: '💡',
       },
       {
-        title: 'Fogpótlások, koronák, hidak',
-        description:
-          'CAD/CAM technológiával készített, tartós és esztétikus megoldások hiányzó fogak pótlására.',
-        image: '/assets/all-on-4.svg',
-      },
-      {
-        title: 'Szájhigiénés kezelések, fogkőeltávolítás',
-        description:
-          'Professzionális ultrahangos fogkőeltávolítás és polírozás, személyre szabott tanácsadással.',
-      },
-      {
-        title: 'Fogfehérítés',
-        description:
-          'Kíméletes, látványos eredményt biztosító rendelői és otthoni fehérítési lehetőségek.',
-      },
-      {
-        title: 'Sürgősségi fogászati ellátás',
-        description:
-          'Gyors segítség akut fájdalom, duzzanat vagy baleset esetén is, akár a nap végéig.',
+        title: 'Surgical dentistry',
+        description: 'Wisdom tooth surgery, apicoectomy and minimally invasive soft tissue corrections.',
+        icon: '🩺',
       },
     ],
     []
   );
 
-  const priceList = [
-    { name: 'Első konzultáció és állapotfelmérés', price: '18 000 Ft-tól', note: 'Részletes kezelési tervvel' },
-    { name: 'Fogkőeltávolítás + polírozás', price: '28 000 Ft-tól', note: 'Szájhigiénés instrukciókkal' },
-    { name: 'Esztétikus kompozit tömés', price: '32 000 Ft-tól', note: 'Fogfelszíntől függően' },
-    { name: 'Bölcsességfog eltávolítása', price: '65 000 Ft-tól', note: 'Sebészeti beavatkozástól függően' },
-    { name: 'Implantátum beültetés (implant + felépítmény)', price: '260 000 Ft-tól', note: 'Prémium rendszerrel' },
-    { name: 'Korona (cirkon / préskerámia)', price: '120 000 Ft-tól', note: 'Digitális lenyomattal' },
-    { name: 'Professzionális fogfehérítés', price: '85 000 Ft-tól', note: 'Rendelői Philips Zoom' },
-    { name: 'Gyökércsúcs rezekció', price: '95 000 Ft-tól', note: 'Sebészeti kezelés, varratokkal' },
+  const specialists = useMemo(
+    () => [
+      {
+        name: 'Dr. David Wilson',
+        role: 'Oral Surgeon',
+        bio: 'Transforms complex surgical cases with advanced 3D diagnostics and gentle care.',
+        tenure: 'Treatment time (est): 60-90 mins',
+        image:
+          'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=500&q=80',
+      },
+      {
+        name: 'Dr. Emma Robinson',
+        role: 'Esthetician',
+        bio: 'Crafts artistic transformations with porcelain veneers and cosmetic care.',
+        tenure: 'Practicing since 2016',
+        image:
+          'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=500&q=80',
+      },
+      {
+        name: 'Dr. Sophia Turner',
+        role: 'Orthodontist',
+        bio: 'Aligns smiles with discreet orthodontic plans and digital progress tracking.',
+        tenure: 'Clear aligner expert',
+        image:
+          'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=500&q=80',
+      },
+    ],
+    []
+  );
+
+  const priceList = useMemo(
+    () => [
+      { name: 'Consultation & treatment plan', price: '18 000 Ft-tól', note: 'Comprehensive oral exam' },
+      { name: 'Professional cleaning + polish', price: '28 000 Ft-tól', note: 'Ultrasonic & airflow' },
+      { name: 'Composite restoration', price: '32 000 Ft-tól', note: 'Shade-matched layers' },
+      { name: 'Wisdom tooth surgery', price: '65 000 Ft-tól', note: 'Includes aftercare' },
+      { name: 'Implant (implant + abutment)', price: '260 000 Ft-tól', note: 'Premium systems' },
+      { name: 'Crown (zirconia / press ceramic)', price: '120 000 Ft-tól', note: 'Digital impression' },
+      { name: 'In-office whitening', price: '85 000 Ft-tól', note: 'Philips Zoom protocol' },
+      { name: 'Apicoectomy', price: '95 000 Ft-tól', note: 'Microscope-assisted' },
+    ],
+    []
+  );
+
+  const testimonialTabs = useMemo(
+    () => [
+      { label: 'Aesthetic dentistry', story: 'Christina felt self-conscious about gaps and uneven shades. With ultra-thin veneers, she now smiles with ease.' },
+      { label: 'Orthodontics', story: 'Daniel completed a 9-month aligner program for a confident, symmetrical smile.' },
+      { label: 'Implantology', story: 'Laura regained full chewing comfort after a digital implant workflow with immediate temporaries.' },
+      { label: 'Whitening', story: 'Mark achieved a luminous, natural brightness in just one visit.' },
+    ],
+    []
+  );
+
+  const heroMetrics = [
+    { label: 'Comfort-focused', value: 'Sedation ready' },
+    { label: '98%', value: 'Satisfaction rate' },
+    { label: '5000+', value: 'Smiles transformed' },
   ];
+
+  const stats = [
+    { value: '15+', label: 'Years of excellence' },
+    { value: '98%', label: 'Patient satisfaction rate' },
+    { value: '5000+', label: 'Smiles transformed' },
+    { value: '17', label: 'Certified experts' },
+  ];
+
+  const [activeTab, setActiveTab] = useState(0);
+  const [sliderValue, setSliderValue] = useState(50);
 
   const handleNavClick = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -75,29 +117,30 @@ const App: React.FC = () => {
         <nav className="navbar">
           <div className="navbar__logo" onClick={() => handleNavClick('hero')}>
             <img src="/assets/szekeres-logo.svg" alt="Szekeres Dental logó" />
+            <span>Celestia Smiles</span>
           </div>
           <div className="navbar__links">
-            <button type="button" onClick={() => handleNavClick('about')}>
-              Rólunk
-            </button>
             <button type="button" onClick={() => handleNavClick('services')}>
-              Szolgáltatások
+              Services
+            </button>
+            <button type="button" onClick={() => handleNavClick('specialists')}>
+              Specialists
+            </button>
+            <button type="button" onClick={() => handleNavClick('testimonials')}>
+              Testimonials
             </button>
             <button type="button" onClick={() => handleNavClick('prices')}>
-              Árak
-            </button>
-            <button type="button" onClick={() => handleNavClick('reviews')}>
-              Vélemények
+              Pricing
             </button>
             <button type="button" onClick={() => handleNavClick('booking')}>
-              Időpontfoglalás
+              Book a visit
             </button>
             <button type="button" onClick={() => handleNavClick('contact')}>
-              Kapcsolat
+              Contact
             </button>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => handleNavClick('booking')}>
-            Foglaljon időpontot
+            Schedule a visit
           </button>
         </nav>
       </header>
@@ -105,96 +148,168 @@ const App: React.FC = () => {
       <main>
         <section id="hero" className="hero">
           <div className="hero__content">
-            <div className="hero__text">
-              <p className="eyebrow">Esztétikai fogászat & szájsebészet</p>
-              <h1>Mosoly, amelyben megbízhat – Szekeres Dental Székesfehérváron</h1>
-              <p className="subtitle">
-                Esztétikai fogászati és szájsebészeti magánrendelőnkben nyugodt, fájdalommentes körülmények között
-                gondoskodunk mosolyáról – modern technológiával, tapasztalt szakértői csapattal.
-              </p>
-              <div className="hero__actions">
-                <button className="btn btn-primary" type="button" onClick={() => handleNavClick('booking')}>
-                  Időpontfoglalás
-                </button>
-                <a className="btn btn-ghost" href="tel:+36705605074">
-                  Telefonhívás
-                </a>
-              </div>
+            <p className="eyebrow">Premium orthodontic & aesthetic care</p>
+            <h1>Not all smiles need fixing, some need vision</h1>
+            <p className="subtitle">
+              We craft confident, camera-ready smiles with bespoke aesthetic dentistry, orthodontics and surgical care —
+              all under one calming, design-led roof.
+            </p>
+            <div className="hero__actions">
+              <button className="btn btn-primary" type="button" onClick={() => handleNavClick('booking')}>
+                Schedule a visit
+              </button>
+              <button className="btn btn-ghost" type="button" onClick={() => handleNavClick('services')}>
+                Explore services
+              </button>
             </div>
-            <div className="hero__image">
-              <img src="/assets/clinic-hero.svg" alt="Szekeres Dental rendelő" />
+            <div className="hero__metrics">
+              {heroMetrics.map((metric) => (
+                <div className="metric-card" key={metric.label}>
+                  <span>{metric.value}</span>
+                  <p>{metric.label}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
-
-        <section id="about" className="section about">
-          <div className="section__header">
-            <h2>Rólunk</h2>
-            <p>Dr. Szekeres Ferenc szájsebész és esztétikai fogorvos bemutatkozása</p>
-          </div>
-          <div className="about__content">
-            <div className="about__text">
-              <h3>Dr. Szekeres Ferenc</h3>
-              <p>
-                Több évtizedes szájsebészeti tapasztalatával, nemzetközi továbbképzéseken szerzett tudásával és a legmodernebb
-                diagnosztikai eszközökkel várja pácienseit Székesfehérvár szívében. Díjnyertes magánrendelőnkben a stresszmentes,
-                biztonságos kezelések mellett a személyes törődést tartjuk a legfontosabbnak.
-              </p>
-              <p>
-                A Seregélyesi úti rendelőben a legújabb digitális eszközökkel és fájdalomcsillapítási protokollokkal dolgozunk,
-                így Ön a lehető legnagyobb nyugalomban koncentrálhat mosolya megújítására.
-              </p>
-              <ul className="key-points">
-                <li>Esztétikai fogászat</li>
-                <li>Szájsebészeti szakértelem</li>
-                <li>Modern technológia</li>
-                <li>Barátságos, türelmes csapat</li>
-              </ul>
+          <div className="hero__visual" aria-hidden="true">
+            <div className="hero__orb hero__orb--lg"></div>
+            <div className="hero__orb hero__orb--sm"></div>
+            <div className="hero__glass">
+              <div className="hero__glass-core"></div>
+              <div className="hero__glass-glow"></div>
             </div>
-            <div className="about__image">
-              <img src="/assets/dr-szekeres.svg" alt="Dr. Szekeres Ferenc" />
-            </div>
+            <p className="hero__caption">Luxury care made personal</p>
           </div>
         </section>
 
         <section id="services" className="section services">
           <div className="section__header">
-            <h2>Szolgáltatásaink</h2>
-            <p>Komplex fogászati és szájsebészeti megoldások egy helyen</p>
+            <p className="eyebrow">Services</p>
+            <h2>Expert care for every smile</h2>
+            <p>Complete spectrum of treatments that elevate confidence, comfort and natural beauty.</p>
           </div>
           <div className="services__grid">
             {services.map((service) => (
               <article className="service-card" key={service.title}>
-                {service.image ? (
-                  <div className="service-card__image">
-                    <img src={service.image} alt={service.title} />
+                <div className="service-card__icon" aria-hidden="true">
+                  {service.icon}
+                </div>
+                <div className="service-card__content">
+                  <h3>{service.title}</h3>
+                  <p>{service.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <button className="btn btn-secondary" type="button" onClick={() => handleNavClick('booking')}>
+            Schedule a visit
+          </button>
+        </section>
+
+        <section id="specialists" className="section specialists">
+          <div className="section__header">
+            <p className="eyebrow">Specialists</p>
+            <h2>Meet the minds behind your smile</h2>
+            <p>Dedicated professionals blending precision, empathy and artistry.</p>
+          </div>
+          <div className="specialists__grid">
+            {specialists.map((specialist) => (
+              <article className="specialist-card" key={specialist.name}>
+                <div className="specialist-card__image">
+                  <img src={specialist.image} alt={specialist.name} loading="lazy" />
+                </div>
+                <div className="specialist-card__body">
+                  <div>
+                    <p className="specialist-card__role">{specialist.role}</p>
+                    <h3>{specialist.name}</h3>
+                    <p>{specialist.bio}</p>
                   </div>
-                ) : (
-                  <div className="service-card__icon" aria-hidden="true">
-                    <span role="img" aria-label="icon">
-                      🦷
-                    </span>
-                  </div>
-                )}
-                <h3>{service.title}</h3>
-                <p>{service.description}</p>
+                  <p className="specialist-card__tenure">{specialist.tenure}</p>
+                </div>
               </article>
             ))}
           </div>
         </section>
 
+        <section id="testimonials" className="section testimonials">
+          <div className="section__header">
+            <p className="eyebrow">Testimonials</p>
+            <h2>Real stories. Real smiles.</h2>
+            <p>Transformation journeys told through visible, confident results.</p>
+          </div>
+          <div className="testimonials__content">
+            <div className="testimonial-tabs">
+              {testimonialTabs.map((tab, index) => (
+                <button
+                  key={tab.label}
+                  className={`testimonial-tab ${index === activeTab ? 'is-active' : ''}`}
+                  type="button"
+                  onClick={() => setActiveTab(index)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <p className="testimonial-story">{testimonialTabs[activeTab].story}</p>
+            <div className="before-after">
+              <div className="before-after__viewer">
+                <img
+                  src="https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=800&q=80"
+                  alt="Before treatment"
+                />
+                <div className="before-after__after" style={{ width: `${sliderValue}%` }}>
+                  <img
+                    src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
+                    alt="After treatment"
+                  />
+                </div>
+                <div className="before-after__divider" style={{ left: `${sliderValue}%` }}>
+                  <span>Drag</span>
+                </div>
+              </div>
+              <input
+                className="before-after__slider"
+                type="range"
+                min="0"
+                max="100"
+                value={sliderValue}
+                onChange={(event) => setSliderValue(Number(event.target.value))}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section id="about" className="section stats">
+          <div className="stats__content">
+            <h2>Unveil excellence. Discover the Celestia difference.</h2>
+            <p>
+              Board-certified experts pairing cutting-edge diagnostics with concierge-style service. Every visit feels calm,
+              considered and obsessively precise.
+            </p>
+            <div className="stats__grid">
+              {stats.map((item) => (
+                <div className="stats-card" key={item.label}>
+                  <span>{item.value}</span>
+                  <p>{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section id="prices" className="section prices">
           <div className="section__header">
-            <h2>Áraink (irányárak)</h2>
-            <p>Transzparens díjszabás, személyre szabott kezelési tervekkel</p>
+            <p className="eyebrow">Pricing</p>
+            <h2>Transparent smile investments</h2>
+            <p>Personalized treatment plans begin with an in-depth consultation.</p>
           </div>
           <div className="prices__table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>Kezelés</th>
-                  <th>Ár (Ft-tól)</th>
-                  <th>Megjegyzés</th>
+                  <th>Treatment</th>
+                  <th>Price</th>
+                  <th>Note</th>
                 </tr>
               </thead>
               <tbody>
@@ -209,45 +324,8 @@ const App: React.FC = () => {
             </table>
           </div>
           <p className="prices__note">
-            A feltüntetett árak tájékoztató jellegűek. Pontos kezelési tervet és árat személyes konzultáció után adunk.
+            All prices are indicative. Exact costs are confirmed after diagnostics and tailored planning.
           </p>
-        </section>
-
-        <section id="reviews" className="section reviews">
-          <div className="section__header">
-            <h2>Pácienseink véleménye</h2>
-            <p>4,9 / 5 – 100+ értékelés a Google-on</p>
-          </div>
-          <div className="reviews__grid">
-            {[
-              {
-                name: 'Anna K.',
-                quote:
-                  'Hihetetlenül kedves csapat, teljesen fájdalommentes volt a bölcsességfog műtétem. Csak ajánlani tudom!',
-              },
-              {
-                name: 'Péter L.',
-                quote:
-                  'A doktornő részletesen elmagyarázott mindent, gyönyörű lett az új koronám. Professzionális élmény.',
-              },
-              {
-                name: 'Judit S.',
-                quote: 'Modern rendelő, mosolygós asszisztensek és figyelmes ellátás – stressz nélkül végig.',
-              },
-              {
-                name: 'Gábor M.',
-                quote: 'SOS ellátásra érkeztem, perceken belül fogadtak, a fájdalom is hamar megszűnt. Köszönöm!',
-              },
-            ].map((review) => (
-              <article className="review-card" key={review.name}>
-                <div className="review-card__rating" aria-label="5 csillag értékelés">
-                  {'★★★★★'}
-                </div>
-                <p className="review-card__quote">“{review.quote}”</p>
-                <p className="review-card__author">{review.name}</p>
-              </article>
-            ))}
-          </div>
         </section>
 
         <BookingSection />
@@ -258,10 +336,8 @@ const App: React.FC = () => {
       <footer className="site-footer">
         <div className="footer__content">
           <img src="/assets/szekeres-logo.svg" alt="Szekeres Dental logó" />
-          <p>© {new Date().getFullYear()} Szekeres Dental – esztétikai fogászat & szájsebészet Székesfehérváron.</p>
-          <p className="footer__powered">
-            Online időpontfoglalás: próba üzemmód – a rendelő visszaigazolása szükséges.
-          </p>
+          <p>© {new Date().getFullYear()} Celestia Smiles – boutique orthodontic & aesthetic studio.</p>
+          <p className="footer__powered">Online booking requests are provisional until confirmed by our coordinators.</p>
         </div>
       </footer>
     </div>

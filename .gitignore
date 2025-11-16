@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+# Vite build artifacts
+dist/
+vite.config.js
+vite.config.d.ts
