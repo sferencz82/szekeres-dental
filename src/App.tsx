@@ -1,34 +1,40 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import BookingSection from './BookingSection';
 import ContactSection from './ContactSection';
 
+type Service = {
+  title: string;
+  description: string;
+  image: string;
+};
+
 const App: React.FC = () => {
-  const services = useMemo(
+  const services = useMemo<Service[]>(
     () => [
       {
         title: 'Esztétikai fogászat',
         description: 'Mosolytervezés, porcelánhéjak és színhű tömések minden páciens igényeire szabva.',
-        icon: '✨',
+        image: '/assets/aestetic.png',
       },
       {
         title: 'Fogszabályozás',
         description: 'Láthatatlan sínterápiák és diszkrét készülékek az egészséges, harmonikus fogsorért.',
-        icon: '🪥',
+        image: '/assets/orthodontics.png',
       },
       {
         title: 'Implantológia',
         description: 'Digitálisan tervezett implantátumok, azonnali terhelés és prémium felépítmények.',
-        image:'/assets/dr-szekeres.png',
+        image: '/assets/implantology.png',
       },
       {
         title: 'Fogfehérítés',
         description: 'Gyengéd rendelői protokoll, amely tartós ragyogást biztosít érzékenység nélkül.',
-        icon: '💡',
+        image: '/whitening.png',
       },
       {
         title: 'Szájsebészet',
         description: 'Bölcsességfog műtét, gyökércsúcs rezekció és minimál invazív lágyrész-korrekciók.',
-        icon: '🩺',
+        image: '/assets/surgical.png',
       },
     ],
     []
@@ -116,6 +122,7 @@ const App: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState(0);
   const [sliderValue, setSliderValue] = useState(50);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   const handleNavClick = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -123,6 +130,29 @@ const App: React.FC = () => {
       section.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const handleServiceClick = (service: Service) => {
+    setSelectedService(service);
+  };
+
+  const handleModalClose = () => {
+    setSelectedService(null);
+  };
+
+  useEffect(() => {
+    if (!selectedService) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleModalClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedService]);
 
   return (
     <div className="app">
@@ -202,16 +232,18 @@ const App: React.FC = () => {
             <h2>Szakértelem minden mosolyhoz</h2>
             <p>Teljes kezelési paletta, amely növeli az önbizalmat, a komfortot és a természetes szépséget.</p>
           </div>
-          <div className="services__grid">
+          <div className="services__grid" role="list">
             {services.map((service) => (
-              <article className="service-card" key={service.title}>
-                <div className="service-card__icon" aria-hidden="true">
-                  {service.icon}
-                </div>
-                <div className="service-card__content">
-                  <h3>{service.title}</h3>
-                  <p>{service.description}</p>
-                </div>
+              <article className="service-card" key={service.title} role="listitem">
+                <button
+                  type="button"
+                  className="service-card__trigger"
+                  onClick={() => handleServiceClick(service)}
+                  aria-label={`${service.title} részletek megnyitása`}
+                >
+                  <img src={service.image} alt={service.title} loading="lazy" />
+                  <span className="service-card__label">{service.title}</span>
+                </button>
               </article>
             ))}
           </div>
@@ -219,6 +251,25 @@ const App: React.FC = () => {
             Foglaljon időpontot
           </button>
         </section>
+
+        {selectedService && (
+          <div className="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-modal-title">
+            <div className="service-modal__backdrop" onClick={handleModalClose} />
+            <div className="service-modal__content">
+              <button className="service-modal__close" type="button" onClick={handleModalClose} aria-label="Bezárás">
+                ×
+              </button>
+              <div className="service-modal__body">
+                <img src={selectedService.image} alt={selectedService.title} />
+                <div>
+                  <p className="eyebrow">Szolgáltatás</p>
+                  <h3 id="service-modal-title">{selectedService.title}</h3>
+                  <p>{selectedService.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <section id="specialists" className="section specialists">
           <div className="section__header">
