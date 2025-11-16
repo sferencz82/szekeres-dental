@@ -82,7 +82,7 @@ const ContactSection: React.FC = () => {
       <div className="contact__grid">
         <div className="contact__details">
           <h3>Elérhetőségek</h3>
-          <p>8000 Székesfehérvár, Seregélyesi út 17</p>
+          <p>8000 Székesfehérvár, Budai út 70.</p>
           <p>
             Telefon: <a href="tel:+36705605074">+36 70 560 5074</a>
           </p>

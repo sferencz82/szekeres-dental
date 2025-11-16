@@ -37,28 +37,28 @@ const App: React.FC = () => {
   const specialists = useMemo(
     () => [
       {
-        name: 'Dr. David Wilson',
-        role: 'Oral Surgeon',
+        name: 'Dr. Szekeres',
+        role: 'Szajsebesz',
         bio: 'Transforms complex surgical cases with advanced 3D diagnostics and gentle care.',
         tenure: 'Treatment time (est): 60-90 mins',
         image:
-          'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=500&q=80',
+          '/assets/dr-szekeres.png',
       },
       {
-        name: 'Dr. Emma Robinson',
-        role: 'Esthetician',
+        name: 'Dr. Szekeres',
+        role: 'Esztetikai fogorvos',
         bio: 'Crafts artistic transformations with porcelain veneers and cosmetic care.',
         tenure: 'Practicing since 2016',
         image:
-          'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=500&q=80',
+          '/assets/dr-szekeres.png',
       },
       {
-        name: 'Dr. Sophia Turner',
-        role: 'Orthodontist',
+        name: 'Dr. Szekeres',
+        role: 'Szajhigenikus',
         bio: 'Aligns smiles with discreet orthodontic plans and digital progress tracking.',
         tenure: 'Clear aligner expert',
         image:
-          'https://images.unsplash.com/photo-1525130413817-d45c1d127c42?auto=format&fit=crop&w=500&q=80',
+          '/assets/dr-szekeres.png',
       },
     ],
     []
@@ -116,27 +116,26 @@ const App: React.FC = () => {
       <header className="site-header">
         <nav className="navbar">
           <div className="navbar__logo" onClick={() => handleNavClick('hero')}>
-            <img src="/assets/szekeres-logo.svg" alt="Szekeres Dental logó" />
-            <span>Celestia Smiles</span>
+            <img src="/assets/szekeres-logo2.png" alt="Szekeres Dental logo" />
           </div>
           <div className="navbar__links">
             <button type="button" onClick={() => handleNavClick('services')}>
-              Services
+              Szolgaltatasaink
             </button>
             <button type="button" onClick={() => handleNavClick('specialists')}>
               Specialists
             </button>
             <button type="button" onClick={() => handleNavClick('testimonials')}>
-              Testimonials
+              Ertekelesek
             </button>
             <button type="button" onClick={() => handleNavClick('prices')}>
-              Pricing
+              Araink
             </button>
             <button type="button" onClick={() => handleNavClick('booking')}>
-              Book a visit
+              Idopont
             </button>
             <button type="button" onClick={() => handleNavClick('contact')}>
-              Contact
+              Kapcsolat
             </button>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => handleNavClick('booking')}>
@@ -176,7 +175,9 @@ const App: React.FC = () => {
             <div className="hero__orb hero__orb--sm"></div>
             <div className="hero__glass">
               <div className="hero__glass-core"></div>
-              <div className="hero__glass-glow"></div>
+              <div className="hero__glass-glow">
+                <img src="/assets/the_blue_teeth.png" alt="The Blue Teeth" />
+              </div>
             </div>
             <p className="hero__caption">Luxury care made personal</p>
           </div>
@@ -209,8 +210,8 @@ const App: React.FC = () => {
         <section id="specialists" className="section specialists">
           <div className="section__header">
             <p className="eyebrow">Specialists</p>
-            <h2>Meet the minds behind your smile</h2>
-            <p>Dedicated professionals blending precision, empathy and artistry.</p>
+            <h2>A csapat aki a mosolyodert felel</h2>
+            <p>Az empatikus es muveszi szakemberek akik a tokeletessegre torekednek.</p>
           </div>
           <div className="specialists__grid">
             {specialists.map((specialist) => (
@@ -335,7 +336,7 @@ const App: React.FC = () => {
 
       <footer className="site-footer">
         <div className="footer__content">
-          <img src="/assets/szekeres-logo.svg" alt="Szekeres Dental logó" />
+          <img src="/assets/szekeres-logo2.png" alt="Szekeres Dental logo" />
           <p>© {new Date().getFullYear()} Celestia Smiles – boutique orthodontic & aesthetic studio.</p>
           <p className="footer__powered">Online booking requests are provisional until confirmed by our coordinators.</p>
         </div>

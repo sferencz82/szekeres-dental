@@ -20,7 +20,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.19.2",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^7.0.10"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
