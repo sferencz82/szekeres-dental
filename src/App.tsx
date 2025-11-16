@@ -18,7 +18,7 @@ const App: React.FC = () => {
       {
         title: 'Implantológia',
         description: 'Digitálisan tervezett implantátumok, azonnali terhelés és prémium felépítmények.',
-        icon: '🦷',
+        image:'/assets/dr-szekeres.png',
       },
       {
         title: 'Fogfehérítés',
