@@ -33,6 +33,13 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 | `SMTP_PORT`        | Yes      | SMTP port (`465` for SSL, otherwise STARTTLS). |
 | `SMTP_USER`        | Yes      | SMTP username or API key. |
 | `SMTP_PASS`        | Yes      | SMTP password / secret. |
+| `GOOGLE_CALENDAR_ID` | No     | Calendar ID that mirrors busy appointments. When set, `/api/availability` removes events returned by the Google Calendar API. |
+| `GOOGLE_CALENDAR_API_KEY` | No | API key with read access to the calendar above. |
+| `GOOGLE_CALENDAR_TIMEZONE` | No | Time zone applied when interpreting Google events (defaults to `Europe/Budapest`). |
+
+### Google Calendar powered availability
+
+If you already track appointments in a Google Calendar, you can surface its busy slots directly inside the booking form. Provide a read-only API key and calendar ID via `GOOGLE_CALENDAR_ID` and `GOOGLE_CALENDAR_API_KEY`. The `/api/availability` endpoint will continue generating slots from the weekly office hours, but it now filters out entries that overlap with Google Calendar events. Use `GOOGLE_CALENDAR_TIMEZONE` when your calendar operates outside of `Europe/Budapest`.
 
 ## Available scripts
 
