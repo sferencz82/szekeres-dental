@@ -27,6 +27,7 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 | Variable           | Required | Description |
 | ------------------ | -------- | ----------- |
 | `PORT`             | No       | Port for the Express server (defaults to `4000`). |
+| `API_BASE_URL`     | No       | Overrides the base URL shown inside the generated Swagger docs. |
 | `CONTACT_TO_EMAIL` | Yes      | Where contact + booking messages are sent. |
 | `SMTP_HOST`        | Yes      | SMTP host used by Nodemailer. |
 | `SMTP_PORT`        | Yes      | SMTP port (`465` for SSL, otherwise STARTTLS). |
@@ -47,3 +48,10 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 2. Update the frontend `.env` so `VITE_API_BASE_URL=http://localhost:4000` if you are not using the default.
 
 Logs are printed to stdout; unhandled errors return JSON `{ success: false, error: string }`.
+
+## API documentation
+
+- Human-friendly docs: <http://localhost:4000/api-docs>
+- Raw OpenAPI JSON: <http://localhost:4000/api-docs.json>
+
+The Swagger UI is automatically generated from the live routes and requires no extra tooling.
