@@ -312,7 +312,7 @@ main {
   margin-bottom: 2rem;
   margin-top: 1.5rem;
   overflow-x: auto;
-  padding-bottom: 1rem;
+  padding: 1rem 0;
   scroll-snap-type: x mandatory;
 }
 
