@@ -317,21 +317,19 @@ const App: React.FC = () => {
             </div>
             <p className="testimonial-story">{testimonialTabs[activeTab].story}</p>
             <div className="before-after">
-              <div className="before-after__viewer">
-                <img
-                  src="https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=800&q=80"
-                  alt="Kezelés előtt"
-                />
-                <div className="before-after__after" style={{ width: `${sliderValue}%` }}>
-                  <img
-                    src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
-                    alt="Kezelés után"
-                  />
-                </div>
-                <div className="before-after__divider" style={{ left: `${sliderValue}%` }}>
-                  <span>Húzza</span>
-                </div>
+            <div className="before-after__viewer">
+              <img src="/assets/before.png" alt="Kezelés előtt" />
+              <div
+                className="before-after__after"
+                style={{ clipPath: `inset(0 ${100 - sliderValue}% 0 0)` }}
+                aria-hidden="true"
+              >
+                <img src="/assets/after.png" alt="Kezelés után" />
               </div>
+              <div className="before-after__divider" style={{ left: `${sliderValue}%` }}>
+                <span>Húzza</span>
+              </div>
+            </div>
               <input
                 className="before-after__slider"
                 type="range"
