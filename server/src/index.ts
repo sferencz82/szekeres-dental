@@ -1,12 +1,13 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import contactRouter from './routes/contact';
 import appointmentsRouter from './routes/appointments';
 import availabilityRouter from './routes/availability';
 import { ApiResponse } from './types';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const PORT = Number(process.env.PORT) || 4000;
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
