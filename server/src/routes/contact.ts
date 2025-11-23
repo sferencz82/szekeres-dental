@@ -4,6 +4,20 @@ import { ContactRequest, ApiResponse } from '../types';
 
 const contactRouter = Router();
 
+const isDev = process.env.NODE_ENV !== 'production';
+
+console.log(`isDev: ${isDev}`);
+
+if (isDev) {
+  console.log('SMTP config:', {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: Number(process.env.SMTP_PORT) === 465,
+    hasUser: !!process.env.SMTP_USER,
+    //hasPass: !!process.env.SMTP_PASS,
+  });
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 587,
@@ -59,7 +73,7 @@ contactRouter.post(
       await transporter.sendMail({
         from: process.env.SMTP_USER,
         to: process.env.CONTACT_TO_EMAIL,
-        subject: 'Új kapcsolatfelvétel a weboldalról – Szekeres Dental',
+        subject: 'Új kapcsolatfelvétel a weboldalról - Szekeres Dental',
         html: formatContactHtml(req.body),
       });
 
