@@ -34,12 +34,12 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 | `SMTP_USER`        | Yes      | SMTP username or API key. |
 | `SMTP_PASS`        | Yes      | SMTP password / secret. |
 | `GOOGLE_CALENDAR_ID` | No     | Calendar ID that mirrors busy appointments. When set, `/api/availability` removes events returned by the Google Calendar API. |
-| `GOOGLE_CALENDAR_API_KEY` | No | API key with read access to the calendar above. |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | No | **Path** to the service account JSON key file (contains both `client_email` and `private_key`). |
 | `GOOGLE_CALENDAR_TIMEZONE` | No | Time zone applied when interpreting Google events (defaults to `Europe/Budapest`). |
 
 ### Google Calendar powered availability
 
-If you already track appointments in a Google Calendar, you can surface its busy slots directly inside the booking form. Provide a read-only API key and calendar ID via `GOOGLE_CALENDAR_ID` and `GOOGLE_CALENDAR_API_KEY`. The `/api/availability` endpoint will continue generating slots from the weekly office hours, but it now filters out entries that overlap with Google Calendar events. Use `GOOGLE_CALENDAR_TIMEZONE` when your calendar operates outside of `Europe/Budapest`.
+If you already track appointments in a Google Calendar, you can surface its busy slots directly inside the booking form. Provide the calendar ID alongside a Google service account JSON key file (referenced by `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`) that has access to that calendar. The `/api/availability` endpoint will continue generating slots from the weekly office hours, but it now filters out entries that overlap with Google Calendar events and the booking endpoint will automatically write new appointments to the same calendar. Use `GOOGLE_CALENDAR_TIMEZONE` when your calendar operates outside of `Europe/Budapest`.
 
 ## Available scripts
 

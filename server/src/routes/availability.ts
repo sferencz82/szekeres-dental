@@ -1,6 +1,11 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse } from '../types';
 import { bookingRequests } from './appointments';
+import {
+  calendarId,
+  calendarTimeZone,
+  getServiceAccountAccessToken,
+} from '../googleServiceAccount';
 
 interface AvailabilityResponse {
   date: string;
@@ -37,10 +42,6 @@ interface GoogleCalendarEventsResponse {
 
 const SLOT_INTERVAL_MINUTES = 30;
 const MINUTES_PER_DAY = 24 * 60;
-
-const calendarId = process.env.GOOGLE_CALENDAR_ID;
-const calendarApiKey = process.env.GOOGLE_CALENDAR_API_KEY;
-const calendarTimeZone = process.env.GOOGLE_CALENDAR_TIMEZONE || 'Europe/Budapest';
 
 const weeklySchedule: Record<number, DaySchedule> = {
   0: null, // Sunday
@@ -156,7 +157,15 @@ const fetchCalendarBusySlots = async (
   date: string,
   daySlots: string[]
 ): Promise<Set<string>> => {
-  if (!calendarId || !calendarApiKey || daySlots.length === 0) {
+  if (!calendarId || daySlots.length === 0) {
+    return new Set();
+  }
+
+  let accessToken: string;
+  try {
+    accessToken = await getServiceAccountAccessToken();
+  } catch (error) {
+    console.error('Unable to authorize Google Calendar request', error);
     return new Set();
   }
 
@@ -174,7 +183,6 @@ const fetchCalendarBusySlots = async (
       calendarId
     )}/events`
   );
-  url.searchParams.set('key', calendarApiKey);
   url.searchParams.set('singleEvents', 'true');
   url.searchParams.set('orderBy', 'startTime');
   url.searchParams.set('timeMin', timeMin);
@@ -183,7 +191,9 @@ const fetchCalendarBusySlots = async (
   url.searchParams.set('timeZone', calendarTimeZone);
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
     if (!response.ok) {
       const body = await response.text();
       console.error(
