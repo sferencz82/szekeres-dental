@@ -1,8 +1,10 @@
 import crypto from 'crypto';
 import fs from 'fs';
 
+type ServiceAccountJson = { client_email?: string; private_key?: string };
+
 const parseServiceAccountJson = (raw: string): { email: string; privateKey: string } => {
-  const parsed = JSON.parse(raw) as { client_email?: string; private_key?: string };
+  const parsed = JSON.parse(raw) as ServiceAccountJson;
 
   if (!parsed.client_email || !parsed.private_key) {
     throw new Error('Service account JSON is missing client_email or private_key');
@@ -14,8 +16,29 @@ const parseServiceAccountJson = (raw: string): { email: string; privateKey: stri
   };
 };
 
+const parseServiceAccountInput = (raw: string): { email: string; privateKey: string } => {
+  const trimmed = raw.trim();
+
+  if (trimmed.startsWith('{')) {
+    return parseServiceAccountJson(trimmed);
+  }
+
+  try {
+    const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
+    const decodedTrimmed = decoded.trim();
+
+    if (decodedTrimmed.startsWith('{')) {
+      return parseServiceAccountJson(decodedTrimmed);
+    }
+  } catch {
+    // Not base64 JSON; continue to error handling.
+  }
+
+  throw new Error('Service account input must be JSON or base64-encoded JSON');
+};
+
 const readKeyFile = (filePath: string): { email: string; privateKey: string } =>
-  parseServiceAccountJson(fs.readFileSync(filePath, 'utf8'));
+  parseServiceAccountInput(fs.readFileSync(filePath, 'utf8'));
 
 const resolveServiceAccountCredentials = (): { email?: string; privateKey?: string } => {
   const envValue = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
@@ -26,21 +49,14 @@ const resolveServiceAccountCredentials = (): { email?: string; privateKey?: stri
 
   const trimmed = envValue.trim();
 
-  if (trimmed.startsWith('{')) {
-    return parseServiceAccountJson(trimmed);
+  if (fs.existsSync(trimmed)) {
+    return readKeyFile(trimmed);
   }
 
   try {
-    const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
-    if (decoded.trim().startsWith('{')) {
-      return parseServiceAccountJson(decoded);
-    }
+    return parseServiceAccountInput(trimmed);
   } catch {
-    // Not base64 JSON; continue trying other strategies.
-  }
-
-  if (fs.existsSync(trimmed)) {
-    return readKeyFile(trimmed);
+    // Not JSON, base64 JSON, or a readable file path.
   }
 
   throw new Error(
