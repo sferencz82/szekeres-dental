@@ -34,7 +34,7 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 | `SMTP_USER`        | Yes      | SMTP username or API key. |
 | `SMTP_PASS`        | Yes      | SMTP password / secret. |
 | `GOOGLE_CALENDAR_ID` | No     | Calendar ID that mirrors busy appointments. When set, `/api/availability` removes events returned by the Google Calendar API. |
-| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | No | **Path** to the service account JSON key file (contains both `client_email` and `private_key`). |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | No | Service account credentials provided either as a **path** to the JSON key file, the raw JSON contents, or the base64-encoded JSON. |
 | `GOOGLE_CALENDAR_TIMEZONE` | No | Time zone applied when interpreting Google events (defaults to `Europe/Budapest`). |
 
 ### Google Calendar powered availability
