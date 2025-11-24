@@ -48,8 +48,14 @@ const parseServiceAccountInput = (raw: string): { email: string; privateKey: str
   throw new Error('Service account input must be JSON or base64-encoded JSON');
 };
 
-const readKeyFile = (filePath: string): { email: string; privateKey: string } =>
-  parseServiceAccountInput(fs.readFileSync(filePath, 'utf8'));
+const readKeyFile = (filePath: string): { email: string; privateKey: string } => {
+  const fileContents = fs.readFileSync(filePath, 'utf8');
+  console.log(
+    `[googleServiceAccount] Loaded service account key file at ${filePath}, preparing to parse.`
+  );
+
+  return parseServiceAccountInput(fileContents);
+};
 
 const resolveServiceAccountCredentials = (): { email?: string; privateKey?: string } => {
   const envValue = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
