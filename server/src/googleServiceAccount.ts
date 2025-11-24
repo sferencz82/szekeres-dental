@@ -16,8 +16,19 @@ const parseServiceAccountJson = (raw: string): { email: string; privateKey: stri
   };
 };
 
+const stripWrappingQuotes = (value: string): string => {
+  const first = value[0];
+  const last = value[value.length - 1];
+
+  if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+    return value.slice(1, -1);
+  }
+
+  return value;
+};
+
 const parseServiceAccountInput = (raw: string): { email: string; privateKey: string } => {
-  const trimmed = raw.trim();
+  const trimmed = stripWrappingQuotes(raw.trim());
 
   if (trimmed.startsWith('{')) {
     return parseServiceAccountJson(trimmed);
