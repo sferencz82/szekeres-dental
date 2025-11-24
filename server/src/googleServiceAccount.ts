@@ -1,12 +1,8 @@
 import crypto from 'crypto';
 import fs from 'fs';
 
-const readKeyFile = (filePath: string): { email: string; privateKey: string } => {
-  const raw = fs.readFileSync(filePath, 'utf8');
-  const parsed = JSON.parse(raw) as {
-    client_email?: string;
-    private_key?: string;
-  };
+const parseServiceAccountJson = (raw: string): { email: string; privateKey: string } => {
+  const parsed = JSON.parse(raw) as { client_email?: string; private_key?: string };
 
   if (!parsed.client_email || !parsed.private_key) {
     throw new Error('Service account JSON is missing client_email or private_key');
@@ -18,15 +14,45 @@ const readKeyFile = (filePath: string): { email: string; privateKey: string } =>
   };
 };
 
+const readKeyFile = (filePath: string): { email: string; privateKey: string } =>
+  parseServiceAccountJson(fs.readFileSync(filePath, 'utf8'));
+
+const resolveServiceAccountCredentials = (): { email?: string; privateKey?: string } => {
+  const envValue = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+
+  if (!envValue) {
+    return { email: undefined, privateKey: undefined };
+  }
+
+  const trimmed = envValue.trim();
+
+  if (trimmed.startsWith('{')) {
+    return parseServiceAccountJson(trimmed);
+  }
+
+  try {
+    const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
+    if (decoded.trim().startsWith('{')) {
+      return parseServiceAccountJson(decoded);
+    }
+  } catch {
+    // Not base64 JSON; continue trying other strategies.
+  }
+
+  if (fs.existsSync(trimmed)) {
+    return readKeyFile(trimmed);
+  }
+
+  throw new Error(
+    'Google service account credentials are missing or invalid. Provide a JSON key file path, raw JSON, or base64-encoded JSON in GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.'
+  );
+};
+
 const calendarScope = 'https://www.googleapis.com/auth/calendar';
 const tokenUrl = 'https://oauth2.googleapis.com/token';
 
-const serviceAccountJsonPath = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-
 const { email: serviceAccountEmail, privateKey: serviceAccountPrivateKey } =
-  serviceAccountJsonPath
-    ? readKeyFile(serviceAccountJsonPath)
-    : { email: undefined, privateKey: undefined };
+  resolveServiceAccountCredentials();
 
 export const calendarId = process.env.GOOGLE_CALENDAR_ID;
 export const calendarTimeZone =
