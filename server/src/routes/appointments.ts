@@ -42,6 +42,19 @@ const formatAppointmentHtml = (payload: BookingRequest): string => `
   <p><strong>Érkezett:</strong> ${payload.receivedAt.toISOString()}</p>
 `;
 
+const formatPatientConfirmationHtml = (payload: BookingRequest): string => `
+  <h2>Köszönjük a foglalási igényét!</h2>
+  <p>Kedves ${payload.fullName.split(' ')[0] || 'Páciensünk'},</p>
+  <p>Foglalási szándékát rögzítettük. Kollégáink ellenőrzik a választott időpont elérhetőségét, és hamarosan felveszik Önnel a kapcsolatot telefonon vagy e-mailben.</p>
+  <ul>
+    <li><strong>Dátum:</strong> ${payload.date}</li>
+    <li><strong>Időpont:</strong> ${payload.time}</li>
+    <li><strong>Kezelés:</strong> ${payload.treatment ?? 'N/A'}</li>
+  </ul>
+  <p>Amennyiben a fenti időpont mégsem megfelelő, kérjük jelezze ezt a válaszlevélben.</p>
+  <p>Üdvözlettel,<br />Szekeres Dental csapata</p>
+`;
+
 const formatDateTime = (
   date: string,
   time: string,
@@ -101,6 +114,7 @@ const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
         description:
           booking.note ||
           'Foglalás a weboldalról (Google szolgáltatási fiók által mentve).',
+        attendees: [],
         start: {
           dateTime: `${booking.date}T${booking.time}:00`,
           timeZone: calendarTimeZone,
@@ -109,7 +123,6 @@ const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
           dateTime: `${endDate}T${endTime}:00`,
           timeZone: calendarTimeZone,
         },
-        attendees: [{ email: booking.email }],
         extendedProperties: {
           private: {
             bookingId: booking.id,
@@ -181,6 +194,13 @@ appointmentsRouter.post(
         to: process.env.CONTACT_TO_EMAIL,
         subject: 'Új időpontfoglalás a weboldalról – Szekeres Dental',
         html: formatAppointmentHtml(booking),
+      });
+
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: booking.email,
+        subject: 'Időpontfoglalási igényed megérkezett – Szekeres Dental',
+        html: formatPatientConfirmationHtml(booking),
       });
 
       return res.json({ success: true });
