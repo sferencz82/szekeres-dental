@@ -18,8 +18,19 @@ interface TreatmentDefinition {
 
 const defaultTreatmentDurationMinutes = 30;
 
-const getTreatmentDefinition = (name?: string): TreatmentDefinition | undefined =>
-  (name ? (treatmentDefinitions as TreatmentDefinition[]).find((option) => option.name === name) : undefined);
+const normalizeTreatmentName = (name?: string): string | undefined => name?.trim();
+
+const getTreatmentDefinition = (name?: string): TreatmentDefinition | undefined => {
+  const normalized = normalizeTreatmentName(name);
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  return (treatmentDefinitions as TreatmentDefinition[]).find(
+    (option) => option.name.localeCompare(normalized, undefined, { sensitivity: 'base' }) === 0
+  );
+};
 
 const appointmentsRouter = Router();
 
@@ -203,15 +214,20 @@ appointmentsRouter.post(
       });
     }
 
-    const matchedTreatment = getTreatmentDefinition(req.body.treatment);
+    const sanitizedTreatment = normalizeTreatmentName(req.body.treatment);
+    const matchedTreatment = getTreatmentDefinition(sanitizedTreatment);
+    const requestedDuration = Number(req.body.treatmentDurationMinutes);
+
+    const resolvedTreatmentDurationMinutes = matchedTreatment?.time_required_in_minutes ??
+      (!Number.isNaN(requestedDuration) && requestedDuration > 0
+        ? requestedDuration
+        : undefined) ??
+      defaultTreatmentDurationMinutes;
 
     const booking: BookingRequest = {
       ...req.body,
-      treatment: req.body.treatment ?? matchedTreatment?.name,
-      treatmentDurationMinutes:
-        matchedTreatment?.time_required_in_minutes ??
-        req.body.treatmentDurationMinutes ??
-        defaultTreatmentDurationMinutes,
+      treatment: sanitizedTreatment ?? matchedTreatment?.name,
+      treatmentDurationMinutes: resolvedTreatmentDurationMinutes,
       treatmentPriceFrom: matchedTreatment?.basic_price_from ?? req.body.treatmentPriceFrom,
       id: randomUUID(),
       receivedAt: new Date(),
