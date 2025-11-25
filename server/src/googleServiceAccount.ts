@@ -1,6 +1,7 @@
 import './env';
 import crypto from 'crypto';
 import fs from 'fs';
+import path from 'path';
 
 const parseServiceAccountJson = (raw: string): { email: string; privateKey: string } => {
   const parsed = JSON.parse(raw) as { client_email?: string; private_key?: string };
@@ -21,31 +22,44 @@ const readKeyFile = (filePath: string): { email: string; privateKey: string } =>
 const resolveServiceAccountCredentials = (): { email?: string; privateKey?: string } => {
   const envValue = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
 
+  console.log(`This is the envValue: ${envValue}`);
+
   if (!envValue) {
     return { email: undefined, privateKey: undefined };
   }
 
   const trimmed = envValue.trim();
+  console.log(`This is the trimmed: ${trimmed}`);
 
+  // 1) Raw JSON directly in env var
   if (trimmed.startsWith('{')) {
     return parseServiceAccountJson(trimmed);
   }
 
+  // 2) Treat as a file path if it exists
+  const possiblePath = path.resolve(trimmed);
+  console.log(`This is the possiblePath: ${possiblePath}`);
+  if (fs.existsSync(possiblePath)) {
+    console.log(`Treating GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY as file path: ${possiblePath}`);
+    return readKeyFile(possiblePath);
+  }
+
+  // 3) Try base64-encoded JSON
   try {
     const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
+    console.log(`This is the decoded: ${decoded}`);
+
     if (decoded.trim().startsWith('{')) {
       return parseServiceAccountJson(decoded);
     }
-  } catch {
-    // Not base64 JSON; continue trying other strategies.
-  }
-
-  if (fs.existsSync(trimmed)) {
-    return readKeyFile(trimmed);
+  } catch (err) {
+    console.log('Failed to decode GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY as base64:', err);
+    // fall through to error below
   }
 
   throw new Error(
-    'Google service account credentials are missing or invalid. Provide a JSON key file path, raw JSON, or base64-encoded JSON in GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.'
+    'Google service account credentials are missing or invalid. ' +
+      'Provide a JSON key file path, raw JSON, or base64-encoded JSON in GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.'
   );
 };
 
