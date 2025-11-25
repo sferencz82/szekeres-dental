@@ -8,6 +8,18 @@ import {
   hasServiceAccountCredentials,
   getServiceAccountAccessToken,
 } from '../googleServiceAccount';
+import treatmentDefinitions from '../../../shared/treatments.json';
+
+interface TreatmentDefinition {
+  name: string;
+  time_required_in_minutes: number;
+  basic_price_from: string;
+}
+
+const defaultTreatmentDurationMinutes = 30;
+
+const getTreatmentDefinition = (name?: string): TreatmentDefinition | undefined =>
+  (name ? (treatmentDefinitions as TreatmentDefinition[]).find((option) => option.name === name) : undefined);
 
 const appointmentsRouter = Router();
 
@@ -30,30 +42,43 @@ const transporter = nodemailer.createTransport({
       : undefined,
 });
 
-const formatAppointmentHtml = (payload: BookingRequest): string => `
-  <h2>Új időpontfoglalás érkezett</h2>
-  <p><strong>Név:</strong> ${payload.fullName}</p>
-  <p><strong>E-mail:</strong> ${payload.email}</p>
-  <p><strong>Telefon:</strong> ${payload.phone}</p>
-  <p><strong>Kezelés:</strong> ${payload.treatment ?? 'N/A'}</p>
-  <p><strong>Dátum:</strong> ${payload.date}</p>
-  <p><strong>Idő:</strong> ${payload.time}</p>
-  <p><strong>Megjegyzés:</strong> ${payload.note ?? 'N/A'}</p>
-  <p><strong>Érkezett:</strong> ${payload.receivedAt.toISOString()}</p>
-`;
+const formatAppointmentHtml = (payload: BookingRequest): string => {
+  const lengthMinutes = payload.treatmentDurationMinutes ?? defaultTreatmentDurationMinutes;
+  const price = payload.treatmentPriceFrom ? `${payload.treatmentPriceFrom}-tól` : 'N/A';
 
-const formatPatientConfirmationHtml = (payload: BookingRequest): string => `
-  <h2>Köszönjük a foglalási igényét!</h2>
-  <p>Kedves ${payload.fullName.split(' ')[0] || 'Páciensünk'},</p>
-  <p>Foglalási szándékát rögzítettük. Kollégáink ellenőrzik a választott időpont elérhetőségét, és hamarosan felveszik Önnel a kapcsolatot telefonon vagy e-mailben.</p>
-  <ul>
-    <li><strong>Dátum:</strong> ${payload.date}</li>
-    <li><strong>Időpont:</strong> ${payload.time}</li>
-    <li><strong>Kezelés:</strong> ${payload.treatment ?? 'N/A'}</li>
-  </ul>
-  <p>Amennyiben a fenti időpont mégsem megfelelő, kérjük jelezze ezt a válaszlevélben.</p>
-  <p>Üdvözlettel,<br />Szekeres Dental csapata</p>
-`;
+  return `
+    <h2>Új időpontfoglalás érkezett</h2>
+    <p><strong>Név:</strong> ${payload.fullName}</p>
+    <p><strong>E-mail:</strong> ${payload.email}</p>
+    <p><strong>Telefon:</strong> ${payload.phone}</p>
+    <p><strong>Kezelés:</strong> ${payload.treatment ?? 'N/A'}</p>
+    <p><strong>Alapár:</strong> ${price}</p>
+    <p><strong>Tervezett időtartam:</strong> ${lengthMinutes} perc</p>
+    <p><strong>Dátum:</strong> ${payload.date}</p>
+    <p><strong>Idő:</strong> ${payload.time}</p>
+    <p><strong>Megjegyzés:</strong> ${payload.note ?? 'N/A'}</p>
+    <p><strong>Érkezett:</strong> ${payload.receivedAt.toISOString()}</p>
+  `;
+};
+
+const formatPatientConfirmationHtml = (payload: BookingRequest): string => {
+  const lengthMinutes = payload.treatmentDurationMinutes ?? defaultTreatmentDurationMinutes;
+  const price = payload.treatmentPriceFrom ? `${payload.treatmentPriceFrom}-tól` : 'véglegesítés alatt';
+  return `
+    <h2>Köszönjük a foglalási igényét!</h2>
+    <p>Kedves ${payload.fullName.split(' ')[0] || 'Páciensünk'},</p>
+    <p>Foglalási szándékát rögzítettük. Kollégáink ellenőrzik a választott időpont elérhetőségét, és hamarosan felveszik Önnel a kapcsolatot telefonon vagy e-mailben.</p>
+    <ul>
+      <li><strong>Dátum:</strong> ${payload.date}</li>
+      <li><strong>Időpont:</strong> ${payload.time}</li>
+      <li><strong>Kezelés:</strong> ${payload.treatment ?? 'N/A'}</li>
+      <li><strong>Alapár:</strong> ${price}</li>
+      <li><strong>Tervezett időtartam:</strong> ${lengthMinutes} perc</li>
+    </ul>
+    <p>Amennyiben a fenti időpont mégsem megfelelő, kérjük jelezze ezt a válaszlevélben.</p>
+    <p>Üdvözlettel,<br />Szekeres Dental csapata</p>
+  `;
+};
 
 const formatDateTime = (
   date: string,
@@ -96,7 +121,7 @@ const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
   const { date: endDate, time: endTime } = formatDateTime(
     booking.date,
     booking.time,
-    30
+    booking.treatmentDurationMinutes ?? defaultTreatmentDurationMinutes
   );
 
   const response = await fetch(
@@ -112,8 +137,16 @@ const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
       body: JSON.stringify({
         summary: `Időpontfoglalás: ${booking.fullName}`,
         description:
-          booking.note ||
-          'Foglalás a weboldalról (Google szolgáltatási fiók által mentve).',
+          [
+            booking.note || 'Foglalás a weboldalról (Google szolgáltatási fiók által mentve).',
+            booking.treatment ? `Kezelés: ${booking.treatment}` : null,
+            booking.treatmentPriceFrom ? `Alapár: ${booking.treatmentPriceFrom}-tól` : null,
+            booking.treatmentDurationMinutes
+              ? `Tervezett időtartam: ${booking.treatmentDurationMinutes} perc`
+              : null,
+          ]
+            .filter(Boolean)
+            .join('\n'),
         attendees: [],
         start: {
           dateTime: `${booking.date}T${booking.time}:00`,
@@ -170,8 +203,16 @@ appointmentsRouter.post(
       });
     }
 
+    const matchedTreatment = getTreatmentDefinition(req.body.treatment);
+
     const booking: BookingRequest = {
       ...req.body,
+      treatment: req.body.treatment ?? matchedTreatment?.name,
+      treatmentDurationMinutes:
+        matchedTreatment?.time_required_in_minutes ??
+        req.body.treatmentDurationMinutes ??
+        defaultTreatmentDurationMinutes,
+      treatmentPriceFrom: matchedTreatment?.basic_price_from ?? req.body.treatmentPriceFrom,
       id: randomUUID(),
       receivedAt: new Date(),
     };
