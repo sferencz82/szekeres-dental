@@ -4,6 +4,7 @@ import { bookingRequests } from './appointments';
 import {
   calendarId,
   calendarTimeZone,
+  hasServiceAccountCredentials,
   getServiceAccountAccessToken,
 } from '../googleServiceAccount';
 
@@ -158,6 +159,10 @@ const fetchCalendarBusySlots = async (
   daySlots: string[]
 ): Promise<Set<string>> => {
   if (!calendarId || daySlots.length === 0) {
+    return new Set();
+  }
+
+  if (!hasServiceAccountCredentials) {
     return new Set();
   }
 

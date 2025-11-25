@@ -5,6 +5,7 @@ import { AppointmentRequest, ApiResponse, BookingRequest } from '../types';
 import {
   calendarId,
   calendarTimeZone,
+  hasServiceAccountCredentials,
   getServiceAccountAccessToken,
 } from '../googleServiceAccount';
 
@@ -68,6 +69,13 @@ const formatDateTime = (
 
 const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
   if (!calendarId) {
+    return;
+  }
+
+  if (!hasServiceAccountCredentials) {
+    console.warn(
+      'Google Calendar ID configured but GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY is missing; skipping calendar event creation.'
+    );
     return;
   }
 
