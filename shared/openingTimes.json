@@ -1,0 +1,17 @@
+{
+  "weekly": {
+    "monday": { "open": "08:30", "close": "16:00" },
+    "tuesday": { "open": "08:30", "close": "16:00" },
+    "wednesday": { "open": "08:30", "close": "16:00" },
+    "thursday": { "open": "08:30", "close": "16:00" },
+    "friday": { "open": "08:30", "close": "16:00" },
+    "saturday": null,
+    "sunday": null
+  },
+  "closures": [
+    { "date": "2024-12-24", "reason": "Ünnepi zárvatartás – Karácsony előestéje" },
+    { "date": "2024-12-25", "reason": "Karácsony – zárva" },
+    { "date": "2024-12-26", "reason": "Karácsony másnapja – zárva" },
+    { "date": "2025-01-02", "reason": "Éves szabadság – január 3-tól újra nyitva" }
+  ]
+}

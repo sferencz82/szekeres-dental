@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import treatments from '../shared/treatments.json';
+import openingTimes from '../shared/openingTimes.json';
 import { getJson, postJson } from './api';
 
 export interface BookingFormValues {
@@ -20,6 +21,16 @@ interface TreatmentOption {
   basic_price_from: string;
 }
 
+type DaySchedule = { open: string; close: string } | null;
+
+interface OpeningTimesConfig {
+  weekly: Partial<Record<
+    'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday',
+    DaySchedule
+  >>;
+  closures?: { date: string; reason?: string; schedule?: DaySchedule }[];
+}
+
 interface BookingSectionProps {
   onSubmitSuccess?: () => void;
 }
@@ -27,6 +38,7 @@ interface BookingSectionProps {
 interface AvailabilityResponse {
   date: string;
   slots: string[];
+  closedReason?: string;
 }
 
 const initialFormValues: BookingFormValues = {
@@ -47,11 +59,49 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string>('');
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   const treatmentOptions = useMemo(() => treatments as TreatmentOption[], []);
+  const openingConfig = useMemo(() => openingTimes as OpeningTimesConfig, []);
+  const weeklySchedule = useMemo(
+    () => ({
+      sunday: openingConfig.weekly?.sunday ?? null,
+      monday: openingConfig.weekly?.monday ?? null,
+      tuesday: openingConfig.weekly?.tuesday ?? null,
+      wednesday: openingConfig.weekly?.wednesday ?? null,
+      thursday: openingConfig.weekly?.thursday ?? null,
+      friday: openingConfig.weekly?.friday ?? null,
+      saturday: openingConfig.weekly?.saturday ?? null,
+    }),
+    [openingConfig.weekly]
+  );
+  const closureMap = useMemo(
+    () => new Map(openingConfig.closures?.map((closure) => [closure.date, closure]) ?? []),
+    [openingConfig.closures]
+  );
 
   const getTreatmentDetails = (name: string): TreatmentOption | undefined =>
     treatmentOptions.find((option) => option.name === name);
+
+  const getScheduleForDate = (
+    date: string
+  ): { schedule: DaySchedule; reason?: string; isClosed: boolean } | null => {
+    if (!date) {
+      return null;
+    }
+
+    const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+    const override = closureMap.get(date);
+    const schedule = override?.schedule ?? Object.values(weeklySchedule)[weekday] ?? null;
+
+    return { schedule, reason: override?.reason, isClosed: !schedule };
+  };
+
+  const scheduleInfo = useMemo(
+    () => (formValues.date ? getScheduleForDate(formValues.date) : null),
+    [formValues.date, closureMap, weeklySchedule]
+  );
+  const isClosedDay = scheduleInfo?.isClosed ?? false;
 
   const handleChange = (field: keyof BookingFormValues, value: string) => {
     const treatmentDetails = field === 'treatment' ? getTreatmentDetails(value) : undefined;
@@ -65,16 +115,39 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
             treatmentPriceFrom: treatmentDetails.basic_price_from,
           }
         : field === 'treatment'
-        ? { treatmentDurationMinutes: undefined, treatmentPriceFrom: undefined }
+        ? { treatmentDurationMinutes: undefined, treatmentPriceFrom: undefined, time: '' }
         : {}),
       ...(field === 'date' ? { time: '' } : {}),
     }));
   };
 
   useEffect(() => {
+    if (cooldownSeconds <= 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setCooldownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [cooldownSeconds]);
+
+  useEffect(() => {
     if (!formValues.date) {
       setAvailableSlots([]);
       setAvailabilityError('');
+      setIsLoadingAvailability(false);
+      return;
+    }
+
+    const dateSchedule = scheduleInfo;
+
+    if (dateSchedule?.isClosed) {
+      setAvailableSlots([]);
+      setAvailabilityError(
+        dateSchedule.reason || 'Ezen a napon a rendelő zárva tart. Válasszon egy másik dátumot.'
+      );
       setIsLoadingAvailability(false);
       return;
     }
@@ -85,7 +158,13 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     setIsLoadingAvailability(true);
     setAvailabilityError('');
 
-    getJson<AvailabilityResponse>(`/api/availability?date=${formValues.date}`, {
+    const duration = formValues.treatmentDurationMinutes || 30;
+    const params = new URLSearchParams({
+      date: formValues.date,
+      durationMinutes: duration.toString(),
+    });
+
+    getJson<AvailabilityResponse>(`/api/availability?${params.toString()}`, {
       signal: controller.signal,
     })
       .then((response) => {
@@ -93,6 +172,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
           return;
         }
         setAvailableSlots(response.slots);
+        setAvailabilityError(response.closedReason ?? '');
       })
       .catch((error) => {
         if (!isActive || (error as DOMException)?.name === 'AbortError') {
@@ -114,7 +194,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
       isActive = false;
       controller.abort();
     };
-  }, [formValues.date]);
+  }, [formValues.date, formValues.treatmentDurationMinutes, scheduleInfo]);
 
   const validateForm = (): string | null => {
     if (!formValues.fullName.trim()) {
@@ -142,11 +222,14 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     if (selectedDate < today) {
       return 'A kiválasztott dátum nem lehet a múltban.';
     }
+    if (isSubmitting || cooldownSeconds > 0) {
+      return 'Kérjük, várjon a következő foglalási próbálkozásig.';
+    }
     if (isLoadingAvailability) {
       return 'Kérjük, várja meg, amíg betöltjük az elérhető időpontokat.';
     }
     if (availabilityError) {
-      return 'Az időpontok betöltése sikertelen volt. Kérjük, válasszon új dátumot vagy próbálja meg később.';
+      return availabilityError;
     }
     if (!formValues.time) {
       return 'Kérjük, válasszon időpontot.';
@@ -162,7 +245,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     : isLoadingAvailability
     ? 'Időpontok betöltése...'
     : availabilityError
-    ? 'Nem sikerült betölteni az időpontokat'
+    ? availabilityError
     : availableSlots.length === 0
     ? 'Nincs elérhető időpont erre a napra'
     : 'Válasszon időpontot...';
@@ -182,6 +265,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     }
 
     setIsSubmitting(true);
+    setCooldownSeconds(15);
 
     try {
       await postJson('/api/appointments', formValues);
@@ -273,9 +357,12 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
               ))}
             </select>
           </label>
+        </div>
+        <div className="form__grid form__grid--schedule">
           <label>
             Dátum
             <input
+              className={`date-input${isClosedDay ? ' date-input--closed' : ''}`}
               type="date"
               name="date"
               value={formValues.date}
@@ -283,24 +370,26 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
               required
             />
           </label>
-          <label>
+          <label className="time-select-label">
             Időpont
-            <select
-              name="time"
-              value={formValues.time}
-              onChange={(event) => handleChange('time', event.target.value)}
-              required
-              disabled={isTimeSelectDisabled}
-            >
-              <option value="" disabled>
-                {timeSelectPlaceholder}
-              </option>
-              {availableSlots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
+            <div className="time-options" role="radiogroup" aria-label="Választható időpontok">
+              {availableSlots.length > 0 ? (
+                availableSlots.map((slot) => (
+                  <button
+                    type="button"
+                    key={slot}
+                    className={`time-option${formValues.time === slot ? ' time-option--selected' : ''}`}
+                    onClick={() => handleChange('time', slot)}
+                    disabled={isTimeSelectDisabled}
+                    aria-pressed={formValues.time === slot}
+                  >
+                    {slot}
+                  </button>
+                ))
+              ) : (
+                <p className="time-options__placeholder">{timeSelectPlaceholder}</p>
+              )}
+            </div>
             {availabilityError && (
               <p className="form__error" role="alert">
                 {availabilityError}
@@ -317,7 +406,11 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
             rows={4}
           />
         </label>
-        <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={isSubmitting || cooldownSeconds > 0 || isLoadingAvailability}
+        >
           {isSubmitting ? 'Küldés...' : 'Időpontot kérek'}
         </button>
         {errorMessage && <p className="form__error" role="alert">{errorMessage}</p>}
@@ -327,6 +420,14 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
           időpontot.
         </p>
       </form>
+      {(isSubmitting || cooldownSeconds > 0) && (
+        <div className="booking__overlay" aria-live="polite">
+          <div className="booking__overlay-content">
+            <p>{isSubmitting ? 'Foglalási kérés küldése...' : 'Új kérés indítható hamarosan.'}</p>
+            {cooldownSeconds > 0 && <p className="booking__overlay-timer">{cooldownSeconds} mp</p>}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

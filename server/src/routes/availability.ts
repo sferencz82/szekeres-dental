@@ -7,13 +7,23 @@ import {
   hasServiceAccountCredentials,
   getServiceAccountAccessToken,
 } from '../googleServiceAccount';
+import openingTimes from '../../../shared/openingTimes.json';
 
 interface AvailabilityResponse {
   date: string;
   slots: string[];
+  closedReason?: string;
 }
 
 type DaySchedule = { open: string; close: string } | null;
+
+interface OpeningTimesConfig {
+  weekly: Partial<Record<
+    'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday',
+    DaySchedule
+  >>;
+  closures?: { date: string; reason?: string; schedule?: DaySchedule }[];
+}
 
 interface DateParts {
   year: number;
@@ -43,16 +53,36 @@ interface GoogleCalendarEventsResponse {
 
 const SLOT_INTERVAL_MINUTES = 30;
 const MINUTES_PER_DAY = 24 * 60;
+const DEFAULT_DURATION_MINUTES = 30;
 
-const weeklySchedule: Record<number, DaySchedule> = {
-  0: null, // Sunday
-  1: { open: '08:30', close: '16:00' },
-  2: { open: '08:30', close: '16:00' },
-  3: { open: '08:30', close: '16:00' },
-  4: { open: '08:30', close: '16:00' },
-  5: { open: '08:30', close: '16:00' },
-  6: { open: '09:00', close: '13:00' },
+const dayKeyToIndex: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
 };
+
+const openingTimesConfig = openingTimes as OpeningTimesConfig;
+
+const weeklySchedule: Record<number, DaySchedule> = Object.entries(
+  openingTimesConfig.weekly || {}
+).reduce((acc, [key, value]) => {
+  const weekdayIndex = dayKeyToIndex[key.toLowerCase()];
+  if (weekdayIndex !== undefined) {
+    acc[weekdayIndex] = value ?? null;
+  }
+  return acc;
+}, {} as Record<number, DaySchedule>);
+
+const closureSchedule = new Map<string, { schedule: DaySchedule; reason?: string }>(
+  (openingTimesConfig.closures || []).map((closure) => [
+    closure.date,
+    { schedule: closure.schedule ?? null, reason: closure.reason },
+  ])
+);
 
 const availabilityRouter = Router();
 
@@ -87,6 +117,20 @@ const generateSlots = (open: string, close: string): string[] => {
 
   return slots;
 };
+
+const getScheduleForDate = (
+  date: string,
+  weekday: number
+): { schedule: DaySchedule; reason?: string } => {
+  const override = closureSchedule.get(date);
+  if (override) {
+    return override;
+  }
+
+  return { schedule: weeklySchedule[weekday] ?? null };
+};
+
+type Interval = { start: number; end: number };
 
 const parseDateParts = (value: string): DateParts => {
   const [year, month, day] = value.split('-').map(Number);
@@ -154,16 +198,13 @@ const minutesRelativeToDay = (
   return null;
 };
 
-const fetchCalendarBusySlots = async (
-  date: string,
-  daySlots: string[]
-): Promise<Set<string>> => {
-  if (!calendarId || daySlots.length === 0) {
-    return new Set();
+const fetchCalendarBusyIntervals = async (date: string): Promise<Interval[]> => {
+  if (!calendarId) {
+    return [];
   }
 
   if (!hasServiceAccountCredentials) {
-    return new Set();
+    return [];
   }
 
   let accessToken: string;
@@ -171,14 +212,10 @@ const fetchCalendarBusySlots = async (
     accessToken = await getServiceAccountAccessToken();
   } catch (error) {
     console.error('Unable to authorize Google Calendar request', error);
-    return new Set();
+    return [];
   }
 
   const referenceDate = parseDateParts(date);
-  const slotMinutePairs = daySlots.map((slot) => ({
-    label: slot,
-    minutes: parseTimeToMinutes(slot),
-  }));
 
   const timeMin = new Date(`${date}T00:00:00Z`).toISOString();
   const timeMax = new Date(`${date}T23:59:59Z`).toISOString();
@@ -207,11 +244,11 @@ const fetchCalendarBusySlots = async (
         response.statusText,
         body
       );
-      return new Set();
+      return [];
     }
 
     const data = (await response.json()) as GoogleCalendarEventsResponse;
-    const busySlots = new Set<string>();
+    const busyIntervals: Interval[] = [];
 
     data.items?.forEach((event) => {
       const startMinutes = minutesRelativeToDay(event.start, referenceDate);
@@ -228,21 +265,18 @@ const fetchCalendarBusySlots = async (
         return;
       }
 
-      slotMinutePairs.forEach(({ label, minutes }) => {
-        const slotStart = minutes;
-        const slotEnd = minutes + SLOT_INTERVAL_MINUTES;
-        if (slotStart < clampedEnd && slotEnd > clampedStart) {
-          busySlots.add(label);
-        }
-      });
+      busyIntervals.push({ start: clampedStart, end: clampedEnd });
     });
 
-    return busySlots;
+    return busyIntervals;
   } catch (error) {
     console.error('Failed to fetch Google Calendar data', error);
-    return new Set();
+    return [];
   }
 };
+
+const isRangeFree = (start: number, end: number, intervals: Interval[]): boolean =>
+  intervals.every((interval) => end <= interval.start || start >= interval.end);
 
 availabilityRouter.get(
   '/',
@@ -250,12 +284,21 @@ availabilityRouter.get(
     req: Request,
     res: Response<AvailabilityResponse | ApiResponse>
   ): Promise<Response<AvailabilityResponse | ApiResponse> | void> => {
-    const { date } = req.query;
+    const { date, durationMinutes } = req.query;
 
     if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({
         success: false,
         error: 'Kérjük, adjon meg egy érvényes dátumot (ÉÉÉÉ-HH-NN).',
+      });
+    }
+
+    const requestedDuration = Number(durationMinutes) || DEFAULT_DURATION_MINUTES;
+
+    if (requestedDuration <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'A kezelés időtartama nem lehet 0 percnél rövidebb.',
       });
     }
 
@@ -269,23 +312,41 @@ availabilityRouter.get(
     }
 
     const weekday = parsedDate.getUTCDay();
-    const schedule = weeklySchedule[weekday] ?? null;
+    const { schedule, reason: closedReason } = getScheduleForDate(date, weekday);
 
     if (!schedule) {
-      return res.json({ date, slots: [] });
+      return res.json({
+        date,
+        slots: [],
+        closedReason: closedReason || 'A rendelő ezen a napon zárva tart.',
+      });
     }
 
     const daySlots = generateSlots(schedule.open, schedule.close);
-    const existingBookings = bookingRequests
+    const startMinutes = parseTimeToMinutes(schedule.open);
+    const endMinutes = parseTimeToMinutes(schedule.close);
+
+    const existingBookingIntervals: Interval[] = bookingRequests
       .filter((booking) => booking.date === date)
-      .map((booking) => booking.time);
-    const bookedSet = new Set(existingBookings);
+      .map((booking) => ({
+        start: parseTimeToMinutes(booking.time),
+        end:
+          parseTimeToMinutes(booking.time) +
+          (booking.treatmentDurationMinutes || DEFAULT_DURATION_MINUTES),
+      }))
+      .filter((interval) => interval.end > interval.start);
 
-    const calendarBusySlots = await fetchCalendarBusySlots(date, daySlots);
+    const calendarBusyIntervals = await fetchCalendarBusyIntervals(date);
+    const busyIntervals = existingBookingIntervals.concat(calendarBusyIntervals);
 
-    const availableSlots = daySlots.filter(
-      (slot) => !bookedSet.has(slot) && !calendarBusySlots.has(slot)
-    );
+    const availableSlots = daySlots
+      .map((slot) => parseTimeToMinutes(slot))
+      .filter((slotStart) => slotStart + requestedDuration <= endMinutes)
+      .filter((slotStart) => slotStart >= startMinutes)
+      .filter((slotStart) =>
+        isRangeFree(slotStart, slotStart + requestedDuration, busyIntervals)
+      )
+      .map((slotStart) => formatMinutes(slotStart));
 
     return res.json({ date, slots: availableSlots });
   }

@@ -98,8 +98,12 @@ const swaggerDocument = {
           date: { type: 'string', example: '2024-06-01' },
           slots: {
             type: 'array',
-            description: 'List of available 30 minute slots (HH:MM).',
+            description: 'List of available start times (HH:MM) that fit the requested treatment duration.',
             items: { type: 'string', example: '09:00' },
+          },
+          closedReason: {
+            type: 'string',
+            description: 'Optional explanation when the practice is closed for the selected date.',
           },
         },
         required: ['date', 'slots'],
@@ -186,6 +190,13 @@ const swaggerDocument = {
             required: true,
             description: 'Date formatted as YYYY-MM-DD.',
             schema: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+          },
+          {
+            name: 'durationMinutes',
+            in: 'query',
+            required: false,
+            description: 'Required treatment duration in minutes. Defaults to 30 minutes.',
+            schema: { type: 'integer', minimum: 1 },
           },
         ],
         responses: {
