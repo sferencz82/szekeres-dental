@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import treatments from '../shared/treatments.json';
 import { getJson, postJson } from './api';
 
 export interface BookingFormValues {
@@ -6,9 +7,17 @@ export interface BookingFormValues {
   email: string;
   phone: string;
   treatment: string;
+  treatmentDurationMinutes?: number;
+  treatmentPriceFrom?: string;
   date: string;
   time: string;
   notes: string;
+}
+
+interface TreatmentOption {
+  name: string;
+  time_required_in_minutes: number;
+  basic_price_from: string;
 }
 
 interface BookingSectionProps {
@@ -39,24 +48,25 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string>('');
 
-  const treatmentOptions = useMemo(
-    () => [
-      'Esztétikai fogászat',
-      'Bölcsességfog műtét',
-      'Gyökércsúcs rezekció',
-      'Implantológia',
-      'Fogpótlások, koronák, hidak',
-      'Szájhigiénés kezelések',
-      'Fogfehérítés',
-      'Sürgősségi ellátás',
-    ],
-    []
-  );
+  const treatmentOptions = useMemo(() => treatments as TreatmentOption[], []);
+
+  const getTreatmentDetails = (name: string): TreatmentOption | undefined =>
+    treatmentOptions.find((option) => option.name === name);
 
   const handleChange = (field: keyof BookingFormValues, value: string) => {
+    const treatmentDetails = field === 'treatment' ? getTreatmentDetails(value) : undefined;
+
     setFormValues((prev) => ({
       ...prev,
       [field]: value,
+      ...(treatmentDetails
+        ? {
+            treatmentDurationMinutes: treatmentDetails.time_required_in_minutes,
+            treatmentPriceFrom: treatmentDetails.basic_price_from,
+          }
+        : field === 'treatment'
+        ? { treatmentDurationMinutes: undefined, treatmentPriceFrom: undefined }
+        : {}),
       ...(field === 'date' ? { time: '' } : {}),
     }));
   };
@@ -184,6 +194,10 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
         preferredTime: formValues.time,
         message: [
           `Kiválasztott kezelés: ${formValues.treatment}`,
+          formValues.treatmentPriceFrom ? `Kezelés alapára: ${formValues.treatmentPriceFrom}-tól` : null,
+          formValues.treatmentDurationMinutes
+            ? `Tervezett kezelés hossza: ${formValues.treatmentDurationMinutes} perc`
+            : null,
           `Foglalni kívánt időpont: ${formValues.date} ${formValues.time}`,
           formValues.notes ? `Megjegyzés: ${formValues.notes}` : null,
         ]
@@ -251,8 +265,10 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
             >
               <option value="">Válasszon...</option>
               {treatmentOptions.map((treatment) => (
-                <option key={treatment} value={treatment}>
-                  {treatment}
+                <option key={treatment.name} value={treatment.name}>
+                  {treatment.basic_price_from
+                    ? `${treatment.name} – ${treatment.basic_price_from}-tól`
+                    : treatment.name}
                 </option>
               ))}
             </select>
