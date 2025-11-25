@@ -1,10 +1,9 @@
+import './env';
 import crypto from 'crypto';
 import fs from 'fs';
 
-type ServiceAccountJson = { client_email?: string; private_key?: string };
-
 const parseServiceAccountJson = (raw: string): { email: string; privateKey: string } => {
-  const parsed = JSON.parse(raw) as ServiceAccountJson;
+  const parsed = JSON.parse(raw) as { client_email?: string; private_key?: string };
 
   if (!parsed.client_email || !parsed.private_key) {
     throw new Error('Service account JSON is missing client_email or private_key');
@@ -16,46 +15,8 @@ const parseServiceAccountJson = (raw: string): { email: string; privateKey: stri
   };
 };
 
-const stripWrappingQuotes = (value: string): string => {
-  const first = value[0];
-  const last = value[value.length - 1];
-
-  if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
-    return value.slice(1, -1);
-  }
-
-  return value;
-};
-
-const parseServiceAccountInput = (raw: string): { email: string; privateKey: string } => {
-  const trimmed = stripWrappingQuotes(raw.trim());
-
-  if (trimmed.startsWith('{')) {
-    return parseServiceAccountJson(trimmed);
-  }
-
-  try {
-    const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
-    const decodedTrimmed = decoded.trim();
-
-    if (decodedTrimmed.startsWith('{')) {
-      return parseServiceAccountJson(decodedTrimmed);
-    }
-  } catch {
-    // Not base64 JSON; continue to error handling.
-  }
-
-  throw new Error('Service account input must be JSON or base64-encoded JSON');
-};
-
-const readKeyFile = (filePath: string): { email: string; privateKey: string } => {
-  const fileContents = fs.readFileSync(filePath, 'utf8');
-  console.log(
-    `[googleServiceAccount] Loaded service account key file at ${filePath}, preparing to parse.`
-  );
-
-  return parseServiceAccountInput(fileContents);
-};
+const readKeyFile = (filePath: string): { email: string; privateKey: string } =>
+  parseServiceAccountJson(fs.readFileSync(filePath, 'utf8'));
 
 const resolveServiceAccountCredentials = (): { email?: string; privateKey?: string } => {
   const envValue = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
@@ -66,14 +27,21 @@ const resolveServiceAccountCredentials = (): { email?: string; privateKey?: stri
 
   const trimmed = envValue.trim();
 
-  if (fs.existsSync(trimmed)) {
-    return readKeyFile(trimmed);
+  if (trimmed.startsWith('{')) {
+    return parseServiceAccountJson(trimmed);
   }
 
   try {
-    return parseServiceAccountInput(trimmed);
+    const decoded = Buffer.from(trimmed, 'base64').toString('utf8');
+    if (decoded.trim().startsWith('{')) {
+      return parseServiceAccountJson(decoded);
+    }
   } catch {
-    // Not JSON, base64 JSON, or a readable file path.
+    // Not base64 JSON; continue trying other strategies.
+  }
+
+  if (fs.existsSync(trimmed)) {
+    return readKeyFile(trimmed);
   }
 
   throw new Error(
@@ -84,12 +52,13 @@ const resolveServiceAccountCredentials = (): { email?: string; privateKey?: stri
 const calendarScope = 'https://www.googleapis.com/auth/calendar';
 const tokenUrl = 'https://oauth2.googleapis.com/token';
 
+process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+const serviceAccountJsonPath = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+
+console.log(`jwt file path: ${serviceAccountJsonPath}`)
+
 const { email: serviceAccountEmail, privateKey: serviceAccountPrivateKey } =
   resolveServiceAccountCredentials();
-
-export const hasServiceAccountCredentials = Boolean(
-  serviceAccountEmail && serviceAccountPrivateKey
-);
 
 export const calendarId = process.env.GOOGLE_CALENDAR_ID;
 export const calendarTimeZone =
