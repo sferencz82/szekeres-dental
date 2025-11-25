@@ -176,8 +176,23 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     try {
       await postJson('/api/appointments', formValues);
 
+      await postJson('/api/contact', {
+        name: formValues.fullName,
+        email: formValues.email,
+        phone: formValues.phone,
+        preferredDay: formValues.date,
+        preferredTime: formValues.time,
+        message: [
+          `Kiválasztott kezelés: ${formValues.treatment}`,
+          `Foglalni kívánt időpont: ${formValues.date} ${formValues.time}`,
+          formValues.notes ? `Megjegyzés: ${formValues.notes}` : null,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      });
+
       setSuccessMessage(
-        'Köszönjük! Időpontfoglalási igényét rögzítettük, kollégánk hamarosan felveszi Önnel a kapcsolatot.'
+        'Köszönjük, rögzítettük foglalási szándékát! Kérjük, várjon, amíg visszaigazoljuk, hogy az időpont biztosan elérhető.'
       );
       setFormValues(initialFormValues);
       onSubmitSuccess?.();
