@@ -60,6 +60,10 @@ console.log(`jwt file path: ${serviceAccountJsonPath}`)
 const { email: serviceAccountEmail, privateKey: serviceAccountPrivateKey } =
   resolveServiceAccountCredentials();
 
+export const hasServiceAccountCredentials = Boolean(
+  serviceAccountEmail && serviceAccountPrivateKey
+);
+
 export const calendarId = process.env.GOOGLE_CALENDAR_ID;
 export const calendarTimeZone =
   process.env.GOOGLE_CALENDAR_TIMEZONE || 'Europe/Budapest';
