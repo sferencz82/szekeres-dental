@@ -229,6 +229,7 @@ appointmentsRouter.post(
       treatment: sanitizedTreatment ?? matchedTreatment?.name,
       treatmentDurationMinutes: resolvedTreatmentDurationMinutes,
       treatmentPriceFrom: matchedTreatment?.basic_price_from ?? req.body.treatmentPriceFrom,
+      note: req.body.note ?? (req.body as any).notes,
       id: randomUUID(),
       receivedAt: new Date(),
     };
