@@ -655,6 +655,107 @@ main {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.treatment-options {
+  border: 1px solid rgba(8, 20, 72, 0.12);
+  border-radius: 18px;
+  padding: 1rem 1.1rem 1.2rem;
+  background: #f7f9ff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.treatment-options legend {
+  font-weight: 700;
+  color: #1e2e6c;
+  padding: 0 0.4rem;
+}
+
+.treatment-options__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.65rem;
+}
+
+.treatment-option {
+  display: flex;
+  gap: 0.6rem;
+  border-radius: 14px;
+  border: 1px solid rgba(8, 20, 72, 0.12);
+  background: #fff;
+  padding: 0.85rem 0.9rem;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.treatment-option input[type='checkbox'] {
+  appearance: none;
+  margin-top: 0.2rem;
+  min-width: 22px;
+  min-height: 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(8, 20, 72, 0.12);
+  background: #f7f9ff;
+  box-shadow: 0 4px 10px rgba(8, 20, 72, 0.1);
+  display: grid;
+  place-items: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.treatment-option input[type='checkbox']::after {
+  content: '✓';
+  font-size: 0.9rem;
+  color: #1e2e6c;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.treatment-option:hover input[type='checkbox'] {
+  border-color: var(--brand-mid);
+  box-shadow: 0 12px 24px rgba(36, 73, 255, 0.15);
+}
+
+.treatment-option input[type='checkbox']:checked {
+  border-color: rgba(36, 73, 255, 0.35);
+  background: linear-gradient(120deg, #e9efff, #d7e3ff);
+  box-shadow: 0 12px 28px rgba(36, 73, 255, 0.2);
+}
+
+.treatment-option input[type='checkbox']:checked::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.treatment-option--selected {
+  border-color: rgba(36, 73, 255, 0.35);
+  background: linear-gradient(120deg, #e9efff, #dfe9ff);
+  box-shadow: 0 10px 26px rgba(36, 73, 255, 0.16);
+}
+
+.treatment-option__name {
+  font-weight: 700;
+  color: #1e2e6c;
+}
+
+.treatment-option__meta {
+  color: #4d5a8c;
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+.treatment-options__summary {
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  background: #eef2ff;
+  border: 1px dashed rgba(8, 20, 72, 0.2);
+  color: #24315f;
+  display: grid;
+  gap: 0.35rem;
+}
+
 .form__grid--schedule {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   align-items: start;
