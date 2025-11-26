@@ -101,7 +101,7 @@ const getTreatmentDefinition = (name?: string) => {
   );
 };
 
-const parseTimeToMinutes = (time: string): number => {
+export const parseTimeToMinutes = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
   if (Number.isNaN(hours) || Number.isNaN(minutes)) {
     throw new Error(`Invalid time format: ${time}`);
@@ -133,7 +133,7 @@ const generateSlots = (open: string, close: string): string[] => {
   return slots;
 };
 
-const getScheduleForDate = (
+export const getScheduleForDate = (
   date: string,
   weekday: number
 ): { schedule: DaySchedule; reason?: string } => {
@@ -213,7 +213,7 @@ const minutesRelativeToDay = (
   return null;
 };
 
-const fetchCalendarBusyIntervals = async (date: string): Promise<Interval[]> => {
+export const fetchCalendarBusyIntervals = async (date: string): Promise<Interval[]> => {
   if (!calendarId) {
     return [];
   }
@@ -290,7 +290,7 @@ const fetchCalendarBusyIntervals = async (date: string): Promise<Interval[]> => 
   }
 };
 
-const isRangeFree = (start: number, end: number, intervals: Interval[]): boolean =>
+export const isRangeFree = (start: number, end: number, intervals: Interval[]): boolean =>
   intervals.every((interval) => end <= interval.start || start >= interval.end);
 
 availabilityRouter.get(
