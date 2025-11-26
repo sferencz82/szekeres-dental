@@ -7,7 +7,7 @@ export interface BookingFormValues {
   fullName: string;
   email: string;
   phone: string;
-  treatment: string;
+  treatments: string[];
   treatmentDurationMinutes?: number;
   treatmentPriceFrom?: string;
   date: string;
@@ -45,7 +45,7 @@ const initialFormValues: BookingFormValues = {
   fullName: '',
   email: '',
   phone: '',
-  treatment: '',
+  treatments: [],
   date: '',
   time: '',
   notes: '',
@@ -83,8 +83,46 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   const getTreatmentDetails = (name: string): TreatmentOption | undefined =>
     treatmentOptions.find((option) => option.name === name);
 
-  const resolveTreatmentDuration = (treatmentName: string, fallback?: number): number =>
-    getTreatmentDetails(treatmentName)?.time_required_in_minutes ?? fallback ?? 30;
+  const parsePriceValue = (value?: string): number => {
+    if (!value) {
+      return 0;
+    }
+    const numeric = Number.parseInt(value.replace(/\D/g, ''), 10);
+    return Number.isNaN(numeric) ? 0 : numeric;
+  };
+
+  const formatPriceValue = (value: number): string | undefined =>
+    value > 0 ? `${value.toLocaleString('hu-HU')} Ft` : undefined;
+
+  const summarizeTreatments = (selectedNames: string[]): {
+    totalDuration?: number;
+    totalPriceFrom?: string;
+  } => {
+    const selectedTreatments = selectedNames
+      .map((name) => getTreatmentDetails(name))
+      .filter(Boolean) as TreatmentOption[];
+
+    if (selectedTreatments.length === 0) {
+      return {};
+    }
+
+    const totalDuration = selectedTreatments.reduce(
+      (sum, treatment) => sum + treatment.time_required_in_minutes,
+      0
+    );
+    const totalPrice = selectedTreatments.reduce(
+      (sum, treatment) => sum + parsePriceValue(treatment.basic_price_from),
+      0
+    );
+
+    return {
+      totalDuration,
+      totalPriceFrom: formatPriceValue(totalPrice),
+    };
+  };
+
+  const resolveTreatmentDuration = (selectedTreatments: string[], fallback?: number): number =>
+    summarizeTreatments(selectedTreatments).totalDuration ?? fallback ?? 30;
 
   const getScheduleForDate = (
     date: string
@@ -105,23 +143,31 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     [formValues.date, closureMap, weeklySchedule]
   );
   const isClosedDay = scheduleInfo?.isClosed ?? false;
+  const selectedTreatmentsLabel = formValues.treatments.join(', ');
 
-  const handleChange = (field: keyof BookingFormValues, value: string) => {
-    const treatmentDetails = field === 'treatment' ? getTreatmentDetails(value) : undefined;
-
+  const handleChange = (field: Exclude<keyof BookingFormValues, 'treatments'>, value: string) => {
     setFormValues((prev) => ({
       ...prev,
       [field]: value,
-      ...(treatmentDetails
-        ? {
-            treatmentDurationMinutes: treatmentDetails.time_required_in_minutes,
-            treatmentPriceFrom: treatmentDetails.basic_price_from,
-          }
-        : field === 'treatment'
-        ? { treatmentDurationMinutes: undefined, treatmentPriceFrom: undefined, time: '' }
-        : {}),
       ...(field === 'date' ? { time: '' } : {}),
     }));
+  };
+
+  const handleTreatmentToggle = (name: string) => {
+    setFormValues((prev) => {
+      const treatments = prev.treatments.includes(name)
+        ? prev.treatments.filter((treatment) => treatment !== name)
+        : [...prev.treatments, name];
+      const { totalDuration, totalPriceFrom } = summarizeTreatments(treatments);
+
+      return {
+        ...prev,
+        treatments,
+        treatmentDurationMinutes: totalDuration,
+        treatmentPriceFrom: totalPriceFrom,
+        time: '',
+      };
+    });
   };
 
   useEffect(() => {
@@ -162,13 +208,13 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     setAvailabilityError('');
 
     const duration = resolveTreatmentDuration(
-      formValues.treatment,
+      formValues.treatments,
       formValues.treatmentDurationMinutes
     );
     const params = new URLSearchParams({
       date: formValues.date,
       durationMinutes: duration.toString(),
-      treatment: formValues.treatment,
+      treatment: formValues.treatments.join(', '),
     });
 
     getJson<AvailabilityResponse>(`/api/availability?${params.toString()}`, {
@@ -217,7 +263,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     if (!formValues.phone.trim()) {
       return 'Kérjük, adja meg telefonszámát.';
     }
-    if (!formValues.treatment) {
+    if (formValues.treatments.length === 0) {
       return 'Kérjük, válasszon kezelést.';
     }
     if (!formValues.date) {
@@ -275,17 +321,16 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     setCooldownSeconds(15);
 
     try {
-      const treatmentDetails = getTreatmentDetails(formValues.treatment);
       const resolvedDuration = resolveTreatmentDuration(
-        formValues.treatment,
+        formValues.treatments,
         formValues.treatmentDurationMinutes
       );
 
       await postJson('/api/appointments', {
         ...formValues,
-        treatment: treatmentDetails?.name ?? formValues.treatment,
+        treatment: formValues.treatments.join(', '),
         treatmentDurationMinutes: resolvedDuration,
-        treatmentPriceFrom: treatmentDetails?.basic_price_from ?? formValues.treatmentPriceFrom,
+        treatmentPriceFrom: formValues.treatmentPriceFrom,
         note: formValues.notes,
       });
 
@@ -296,7 +341,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
         preferredDay: formValues.date,
         preferredTime: formValues.time,
         message: [
-          `Kiválasztott kezelés: ${formValues.treatment}`,
+          `Kiválasztott kezelés: ${selectedTreatmentsLabel}`,
           formValues.treatmentPriceFrom ? `Kezelés alapára: ${formValues.treatmentPriceFrom}-tól` : null,
           formValues.treatmentDurationMinutes
             ? `Tervezett kezelés hossza: ${formValues.treatmentDurationMinutes} perc`
@@ -358,25 +403,51 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
               required
             />
           </label>
-          <label>
-            Választott kezelés
-            <select
-              name="treatment"
-              value={formValues.treatment}
-              onChange={(event) => handleChange('treatment', event.target.value)}
-              required
-            >
-              <option value="">Válasszon...</option>
-              {treatmentOptions.map((treatment) => (
-                <option key={treatment.name} value={treatment.name}>
-                  {treatment.basic_price_from
-                    ? `${treatment.name} – ${treatment.basic_price_from}-tól`
-                    : treatment.name}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
+        <fieldset className="treatment-options">
+          <legend>Választott kezelések</legend>
+          <div className="treatment-options__grid" role="group" aria-label="Választható kezelések">
+            {treatmentOptions.map((treatment) => {
+              const isSelected = formValues.treatments.includes(treatment.name);
+
+              return (
+                <label
+                  key={treatment.name}
+                  className={`treatment-option${isSelected ? ' treatment-option--selected' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    name="treatments"
+                    value={treatment.name}
+                    checked={isSelected}
+                    onChange={() => handleTreatmentToggle(treatment.name)}
+                  />
+                  <div className="treatment-option__content">
+                    <span className="treatment-option__name">{treatment.name}</span>
+                    <span className="treatment-option__meta">
+                      {treatment.basic_price_from ? `${treatment.basic_price_from}-tól` : 'Ár egyeztetés után'}
+                      {' • '} {treatment.time_required_in_minutes} perc
+                    </span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+          <div className="treatment-options__summary" aria-live="polite">
+            <p>
+              <strong>Kiválasztott kezelések:</strong>{' '}
+              {selectedTreatmentsLabel || 'Válasszon egy vagy több kezelést.'}
+            </p>
+            <p>
+              <strong>Kiinduló ár összesen:</strong>{' '}
+              {formValues.treatmentPriceFrom ? `${formValues.treatmentPriceFrom}-tól` : '---'}
+            </p>
+            <p>
+              <strong>Tervezett időigény:</strong>{' '}
+              {formValues.treatmentDurationMinutes ? `${formValues.treatmentDurationMinutes} perc` : '---'}
+            </p>
+          </div>
+        </fieldset>
         <div className="form__grid form__grid--schedule">
           <label>
             Dátum
