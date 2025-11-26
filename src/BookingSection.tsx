@@ -83,6 +83,9 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   const getTreatmentDetails = (name: string): TreatmentOption | undefined =>
     treatmentOptions.find((option) => option.name === name);
 
+  const resolveTreatmentDuration = (treatmentName: string, fallback?: number): number =>
+    getTreatmentDetails(treatmentName)?.time_required_in_minutes ?? fallback ?? 30;
+
   const getScheduleForDate = (
     date: string
   ): { schedule: DaySchedule; reason?: string; isClosed: boolean } | null => {
@@ -158,10 +161,14 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     setIsLoadingAvailability(true);
     setAvailabilityError('');
 
-    const duration = formValues.treatmentDurationMinutes || 30;
+    const duration = resolveTreatmentDuration(
+      formValues.treatment,
+      formValues.treatmentDurationMinutes
+    );
     const params = new URLSearchParams({
       date: formValues.date,
       durationMinutes: duration.toString(),
+      treatment: formValues.treatment,
     });
 
     getJson<AvailabilityResponse>(`/api/availability?${params.toString()}`, {
@@ -268,7 +275,19 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     setCooldownSeconds(15);
 
     try {
-      await postJson('/api/appointments', formValues);
+      const treatmentDetails = getTreatmentDetails(formValues.treatment);
+      const resolvedDuration = resolveTreatmentDuration(
+        formValues.treatment,
+        formValues.treatmentDurationMinutes
+      );
+
+      await postJson('/api/appointments', {
+        ...formValues,
+        treatment: treatmentDetails?.name ?? formValues.treatment,
+        treatmentDurationMinutes: resolvedDuration,
+        treatmentPriceFrom: treatmentDetails?.basic_price_from ?? formValues.treatmentPriceFrom,
+        note: formValues.notes,
+      });
 
       await postJson('/api/contact', {
         name: formValues.fullName,

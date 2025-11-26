@@ -8,6 +8,7 @@ import {
   getServiceAccountAccessToken,
 } from '../googleServiceAccount';
 import openingTimes from '../../../shared/openingTimes.json';
+import treatmentDefinitions from '../../../shared/treatments.json';
 
 interface AvailabilityResponse {
   date: string;
@@ -85,6 +86,20 @@ const closureSchedule = new Map<string, { schedule: DaySchedule; reason?: string
 );
 
 const availabilityRouter = Router();
+
+const normalizeTreatmentName = (name?: string): string | undefined => name?.trim();
+
+const getTreatmentDefinition = (name?: string) => {
+  const normalized = normalizeTreatmentName(name);
+  if (!normalized) {
+    return undefined;
+  }
+
+  return (treatmentDefinitions as { name: string; time_required_in_minutes: number }[]).find(
+    (definition) =>
+      definition.name.localeCompare(normalized, undefined, { sensitivity: 'base' }) === 0
+  );
+};
 
 const parseTimeToMinutes = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -284,7 +299,7 @@ availabilityRouter.get(
     req: Request,
     res: Response<AvailabilityResponse | ApiResponse>
   ): Promise<Response<AvailabilityResponse | ApiResponse> | void> => {
-    const { date, durationMinutes } = req.query;
+    const { date, durationMinutes, treatment } = req.query;
 
     if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({
@@ -293,7 +308,11 @@ availabilityRouter.get(
       });
     }
 
-    const requestedDuration = Number(durationMinutes) || DEFAULT_DURATION_MINUTES;
+    const treatmentDefinition =
+      typeof treatment === 'string' ? getTreatmentDefinition(treatment) : undefined;
+
+    const requestedDuration =
+      treatmentDefinition?.time_required_in_minutes || Number(durationMinutes) || DEFAULT_DURATION_MINUTES;
 
     if (requestedDuration <= 0) {
       return res.status(400).json({
@@ -332,7 +351,7 @@ availabilityRouter.get(
         start: parseTimeToMinutes(booking.time),
         end:
           parseTimeToMinutes(booking.time) +
-          (booking.treatmentDurationMinutes || DEFAULT_DURATION_MINUTES),
+          (Number(booking.treatmentDurationMinutes) || DEFAULT_DURATION_MINUTES),
       }))
       .filter((interval) => interval.end > interval.start);
 
