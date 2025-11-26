@@ -1,7 +1,11 @@
-const baseUrl =
+const envApiBaseUrl =
   (typeof import.meta !== 'undefined' && (import.meta as any)?.env?.VITE_API_BASE_URL) ||
-  (typeof globalThis !== 'undefined' && (globalThis as any)?.process?.env?.REACT_APP_API_BASE_URL) ||
-  'http://localhost:4000';
+  (typeof globalThis !== 'undefined' && (globalThis as any)?.process?.env?.REACT_APP_API_BASE_URL);
+
+const runtimeDefaultBaseUrl =
+  typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '';
+
+const baseUrl = envApiBaseUrl || runtimeDefaultBaseUrl || 'http://localhost:4000';
 
 const buildUrl = (path: string): string => {
   if (/^https?:\/\//i.test(path)) {

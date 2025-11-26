@@ -35,10 +35,19 @@ interface BookingSectionProps {
   onSubmitSuccess?: () => void;
 }
 
+interface AvailabilitySlot {
+  start: string;
+  end: string;
+}
+
 interface AvailabilityResponse {
   date: string;
-  slots: string[];
+  slots: AvailabilitySlot[];
   closedReason?: string;
+}
+
+interface BookableDatesResponse {
+  dates: string[];
 }
 
 const initialFormValues: BookingFormValues = {
@@ -56,9 +65,12 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<AvailabilitySlot[]>([]);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string>('');
+  const [bookableDates, setBookableDates] = useState<string[]>([]);
+  const [isLoadingBookableDates, setIsLoadingBookableDates] = useState(false);
+  const [bookableDatesError, setBookableDatesError] = useState<string>('');
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   const treatmentOptions = useMemo(() => treatments as TreatmentOption[], []);
@@ -153,6 +165,19 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     }));
   };
 
+  const handleDateSelection = (value: string) => {
+    if (value && bookableDates.length > 0 && !bookableDates.includes(value)) {
+      setAvailabilityError(
+        'Erre a dátumra nincs elérhető időpont a kiválasztott kezelési idővel. Kérjük, válasszon másikat.'
+      );
+      setFormValues((prev) => ({ ...prev, date: '', time: '' }));
+      return;
+    }
+
+    setAvailabilityError('');
+    handleChange('date', value);
+  };
+
   const handleTreatmentToggle = (name: string) => {
     setFormValues((prev) => {
       const treatments = prev.treatments.includes(name)
@@ -183,10 +208,75 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
   }, [cooldownSeconds]);
 
   useEffect(() => {
+    if (!formValues.date && bookableDates.length > 0) {
+      setFormValues((prev) => ({ ...prev, date: bookableDates[0], time: '' }));
+    }
+  }, [bookableDates, formValues.date]);
+
+  useEffect(() => {
+    const duration = resolveTreatmentDuration(
+      formValues.treatments,
+      formValues.treatmentDurationMinutes
+    );
+
+    const controller = new AbortController();
+    let isActive = true;
+
+    const params = new URLSearchParams({
+      durationMinutes: duration.toString(),
+      treatment: formValues.treatments.join(', '),
+    });
+
+    setIsLoadingBookableDates(true);
+    setBookableDatesError('');
+    setBookableDates([]);
+
+    getJson<BookableDatesResponse>(`/api/availability/dates?${params.toString()}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!isActive) {
+          return;
+        }
+        setBookableDates(response.dates);
+        if (response.dates.length === 0) {
+          setBookableDatesError(
+            'A következő időszakban nem találtunk elérhető időpontot a kiválasztott kezelési idővel.'
+          );
+        }
+      })
+      .catch((error) => {
+        if (!isActive || (error as DOMException)?.name === 'AbortError') {
+          return;
+        }
+        console.error('Failed to fetch bookable dates', error);
+        setBookableDatesError(
+          'Nem sikerült betölteni a foglalható napokat. Kérjük, próbálja újra vagy vegye fel velünk a kapcsolatot.'
+        );
+        setBookableDates([]);
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoadingBookableDates(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [formValues.treatments, formValues.treatmentDurationMinutes]);
+
+  useEffect(() => {
     if (!formValues.date) {
       setAvailableSlots([]);
       setAvailabilityError('');
       setIsLoadingAvailability(false);
+      return;
+    }
+
+    if (bookableDates.length > 0 && !bookableDates.includes(formValues.date)) {
+      setFormValues((prev) => ({ ...prev, date: '', time: '' }));
       return;
     }
 
@@ -247,7 +337,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
       isActive = false;
       controller.abort();
     };
-  }, [formValues.date, formValues.treatmentDurationMinutes, scheduleInfo]);
+  }, [formValues.date, formValues.treatmentDurationMinutes, formValues.treatments, scheduleInfo]);
 
   const validateForm = (): string | null => {
     if (!formValues.fullName.trim()) {
@@ -281,20 +371,23 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     if (isLoadingAvailability) {
       return 'Kérjük, várja meg, amíg betöltjük az elérhető időpontokat.';
     }
+    if (bookableDatesError) {
+      return bookableDatesError;
+    }
     if (availabilityError) {
       return availabilityError;
     }
     if (!formValues.time) {
       return 'Kérjük, válasszon időpontot.';
     }
-    if (availableSlots.length > 0 && !availableSlots.includes(formValues.time)) {
+    if (availableSlots.length > 0 && !availableSlots.some((slot) => slot.start === formValues.time)) {
       return 'A kiválasztott időpont már nem érhető el. Kérjük, válasszon másikat.';
     }
     return null;
   };
 
   const timeSelectPlaceholder = !formValues.date
-    ? 'Válasszon dátumot először...'
+    ? bookableDatesError || (isLoadingBookableDates ? 'Foglalható napok betöltése...' : 'Válasszon dátumot először...')
     : isLoadingAvailability
     ? 'Időpontok betöltése...'
     : availabilityError
@@ -303,8 +396,15 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
     ? 'Nincs elérhető időpont erre a napra'
     : 'Válasszon időpontot...';
 
+  const isDateAvailable = !formValues.date || bookableDates.includes(formValues.date);
+
   const isTimeSelectDisabled =
-    !formValues.date || isLoadingAvailability || !!availabilityError || availableSlots.length === 0;
+    !formValues.date ||
+    isLoadingAvailability ||
+    isLoadingBookableDates ||
+    !!availabilityError ||
+    availableSlots.length === 0 ||
+    !isDateAvailable;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -456,9 +556,17 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
               type="date"
               name="date"
               value={formValues.date}
-              onChange={(event) => handleChange('date', event.target.value)}
+              min={bookableDates[0] ?? ''}
+              max={bookableDates[bookableDates.length - 1] ?? ''}
+              onChange={(event) => handleDateSelection(event.target.value)}
+              disabled={isLoadingBookableDates || bookableDates.length === 0}
               required
             />
+            {bookableDatesError && (
+              <p className="form__error" role="alert">
+                {bookableDatesError}
+              </p>
+            )}
           </label>
           <label className="time-select-label">
             Időpont
@@ -467,13 +575,13 @@ const BookingSection: React.FC<BookingSectionProps> = ({ onSubmitSuccess }) => {
                 availableSlots.map((slot) => (
                   <button
                     type="button"
-                    key={slot}
-                    className={`time-option${formValues.time === slot ? ' time-option--selected' : ''}`}
-                    onClick={() => handleChange('time', slot)}
+                    key={`${slot.start}-${slot.end}`}
+                    className={`time-option${formValues.time === slot.start ? ' time-option--selected' : ''}`}
+                    onClick={() => handleChange('time', slot.start)}
                     disabled={isTimeSelectDisabled}
-                    aria-pressed={formValues.time === slot}
+                    aria-pressed={formValues.time === slot.start}
                   >
-                    {slot}
+                    {slot.start} - {slot.end}
                   </button>
                 ))
               ) : (

@@ -10,10 +10,19 @@ import {
 import openingTimes from '../../../shared/openingTimes.json';
 import treatmentDefinitions from '../../../shared/treatments.json';
 
+interface AvailabilitySlot {
+  start: string;
+  end: string;
+}
+
 interface AvailabilityResponse {
   date: string;
-  slots: string[];
+  slots: AvailabilitySlot[];
   closedReason?: string;
+}
+
+interface BookableDatesResponse {
+  dates: string[];
 }
 
 type DaySchedule = { open: string; close: string } | null;
@@ -163,6 +172,19 @@ const differenceInDays = (a: DateParts, b: DateParts): number => {
   return Math.round(diff / (24 * 60 * 60 * 1000));
 };
 
+const parseDateOnly = (value: string): DateParts => {
+  const parts = parseDateParts(value);
+  if (Number.isNaN(Date.UTC(parts.year, parts.month - 1, parts.day))) {
+    throw new Error(`Invalid date format: ${value}`);
+  }
+  return parts;
+};
+
+const formatDateParts = (parts: DateParts): string =>
+  `${parts.year}-${parts.month.toString().padStart(2, '0')}-${parts.day
+    .toString()
+    .padStart(2, '0')}`;
+
 const getZonedDateTimeParts = (date: Date, timeZone: string): DateTimeParts => {
   const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone,
@@ -211,6 +233,25 @@ const minutesRelativeToDay = (
   }
 
   return null;
+};
+
+const parseRequestedDuration = (
+  durationMinutes: unknown,
+  treatmentName?: unknown
+): number => {
+  const treatmentDefinition =
+    typeof treatmentName === 'string' ? getTreatmentDefinition(treatmentName) : undefined;
+
+  if (treatmentDefinition?.time_required_in_minutes) {
+    return treatmentDefinition.time_required_in_minutes;
+  }
+
+  const parsedDuration = Number(durationMinutes);
+  if (!Number.isNaN(parsedDuration) && parsedDuration > 0) {
+    return parsedDuration;
+  }
+
+  return DEFAULT_DURATION_MINUTES;
 };
 
 export const fetchCalendarBusyIntervals = async (date: string): Promise<Interval[]> => {
@@ -293,6 +334,57 @@ export const fetchCalendarBusyIntervals = async (date: string): Promise<Interval
 export const isRangeFree = (start: number, end: number, intervals: Interval[]): boolean =>
   intervals.every((interval) => end <= interval.start || start >= interval.end);
 
+const getDayAvailability = async (
+  date: string,
+  requestedDuration: number
+): Promise<AvailabilityResponse> => {
+  const parsedDate = new Date(`${date}T00:00:00Z`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new Error('Invalid date value');
+  }
+
+  const weekday = parsedDate.getUTCDay();
+  const { schedule, reason: closedReason } = getScheduleForDate(date, weekday);
+
+  if (!schedule) {
+    return {
+      date,
+      slots: [],
+      closedReason: closedReason || 'A rendelő ezen a napon zárva tart.',
+    };
+  }
+
+  const daySlots = generateSlots(schedule.open, schedule.close);
+  const startMinutes = parseTimeToMinutes(schedule.open);
+  const endMinutes = parseTimeToMinutes(schedule.close);
+
+  const existingBookingIntervals: Interval[] = bookingRequests
+    .filter((booking) => booking.date === date)
+    .map((booking) => ({
+      start: parseTimeToMinutes(booking.time),
+      end:
+        parseTimeToMinutes(booking.time) +
+        (Number(booking.treatmentDurationMinutes) || DEFAULT_DURATION_MINUTES),
+    }))
+    .filter((interval) => interval.end > interval.start);
+
+  const calendarBusyIntervals = await fetchCalendarBusyIntervals(date);
+  const busyIntervals = existingBookingIntervals.concat(calendarBusyIntervals);
+
+  const availableSlots = daySlots
+    .map((slot) => parseTimeToMinutes(slot))
+    .filter((slotStart) => slotStart + requestedDuration <= endMinutes)
+    .filter((slotStart) => slotStart >= startMinutes)
+    .filter((slotStart) => isRangeFree(slotStart, slotStart + requestedDuration, busyIntervals))
+    .map((slotStart) => ({
+      start: formatMinutes(slotStart),
+      end: formatMinutes(slotStart + requestedDuration),
+    }));
+
+  return { date, slots: availableSlots, closedReason };
+};
+
 availabilityRouter.get(
   '/',
   async (
@@ -308,12 +400,7 @@ availabilityRouter.get(
       });
     }
 
-    const treatmentDefinition =
-      typeof treatment === 'string' ? getTreatmentDefinition(treatment) : undefined;
-
-    const requestedDuration =
-      treatmentDefinition?.time_required_in_minutes || Number(durationMinutes) || DEFAULT_DURATION_MINUTES;
-
+    const requestedDuration = parseRequestedDuration(durationMinutes, treatment);
     if (requestedDuration <= 0) {
       return res.status(400).json({
         success: false,
@@ -321,53 +408,66 @@ availabilityRouter.get(
       });
     }
 
-    const parsedDate = new Date(`${date}T00:00:00Z`);
-
-    if (Number.isNaN(parsedDate.getTime())) {
+    try {
+      const availability = await getDayAvailability(date, requestedDuration);
+      return res.json(availability);
+    } catch (error) {
       return res.status(400).json({
         success: false,
         error: 'A megadott dátum formátuma érvénytelen.',
       });
     }
+  }
+);
 
-    const weekday = parsedDate.getUTCDay();
-    const { schedule, reason: closedReason } = getScheduleForDate(date, weekday);
+availabilityRouter.get(
+  '/dates',
+  async (
+    req: Request,
+    res: Response<BookableDatesResponse | ApiResponse>
+  ): Promise<Response<BookableDatesResponse | ApiResponse> | void> => {
+    const { durationMinutes, treatment, startDate, daysAhead } = req.query;
 
-    if (!schedule) {
-      return res.json({
-        date,
-        slots: [],
-        closedReason: closedReason || 'A rendelő ezen a napon zárva tart.',
+    const requestedDuration = parseRequestedDuration(durationMinutes, treatment);
+    if (requestedDuration <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'A kezelés időtartama nem lehet 0 percnél rövidebb.',
       });
     }
 
-    const daySlots = generateSlots(schedule.open, schedule.close);
-    const startMinutes = parseTimeToMinutes(schedule.open);
-    const endMinutes = parseTimeToMinutes(schedule.close);
+    const totalDaysToCheck = Math.min(Math.max(Number(daysAhead) || 90, 1), 365);
 
-    const existingBookingIntervals: Interval[] = bookingRequests
-      .filter((booking) => booking.date === date)
-      .map((booking) => ({
-        start: parseTimeToMinutes(booking.time),
-        end:
-          parseTimeToMinutes(booking.time) +
-          (Number(booking.treatmentDurationMinutes) || DEFAULT_DURATION_MINUTES),
-      }))
-      .filter((interval) => interval.end > interval.start);
+    let startDateParts: DateParts;
+    try {
+      startDateParts =
+        typeof startDate === 'string' && startDate
+          ? parseDateOnly(startDate)
+          : getZonedDateTimeParts(new Date(), calendarTimeZone);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: 'Kérjük, adjon meg egy érvényes kezdődátumot (ÉÉÉÉ-HH-NN).',
+      });
+    }
 
-    const calendarBusyIntervals = await fetchCalendarBusyIntervals(date);
-    const busyIntervals = existingBookingIntervals.concat(calendarBusyIntervals);
+    const availableDates: string[] = [];
 
-    const availableSlots = daySlots
-      .map((slot) => parseTimeToMinutes(slot))
-      .filter((slotStart) => slotStart + requestedDuration <= endMinutes)
-      .filter((slotStart) => slotStart >= startMinutes)
-      .filter((slotStart) =>
-        isRangeFree(slotStart, slotStart + requestedDuration, busyIntervals)
-      )
-      .map((slotStart) => formatMinutes(slotStart));
+    for (let offset = 0; offset < totalDaysToCheck; offset += 1) {
+      const currentDate = new Date(Date.UTC(startDateParts.year, startDateParts.month - 1, startDateParts.day));
+      currentDate.setUTCDate(currentDate.getUTCDate() + offset);
 
-    return res.json({ date, slots: availableSlots });
+      const dateString = formatDateParts(
+        getZonedDateTimeParts(currentDate, calendarTimeZone)
+      );
+
+      const availability = await getDayAvailability(dateString, requestedDuration);
+      if (availability.slots.length > 0) {
+        availableDates.push(dateString);
+      }
+    }
+
+    return res.json({ dates: availableDates });
   }
 );
 
