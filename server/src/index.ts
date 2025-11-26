@@ -98,8 +98,16 @@ const swaggerDocument = {
           date: { type: 'string', example: '2024-06-01' },
           slots: {
             type: 'array',
-            description: 'List of available start times (HH:MM) that fit the requested treatment duration.',
-            items: { type: 'string', example: '09:00' },
+            description:
+              'List of available ranges that fit the requested treatment duration, expressed in HH:MM format.',
+            items: {
+              type: 'object',
+              properties: {
+                start: { type: 'string', example: '09:00' },
+                end: { type: 'string', example: '12:15' },
+              },
+              required: ['start', 'end'],
+            },
           },
           closedReason: {
             type: 'string',
@@ -107,6 +115,17 @@ const swaggerDocument = {
           },
         },
         required: ['date', 'slots'],
+      },
+      BookableDatesResponse: {
+        type: 'object',
+        properties: {
+          dates: {
+            type: 'array',
+            description: 'List of YYYY-MM-DD dates where at least one slot is available.',
+            items: { type: 'string', example: '2024-06-01' },
+          },
+        },
+        required: ['dates'],
       },
     },
   },
@@ -210,6 +229,58 @@ const swaggerDocument = {
           },
           400: {
             description: 'Invalid or missing date query parameter.',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ApiError' } },
+            },
+          },
+        },
+      },
+    },
+    '/api/availability/dates': {
+      get: {
+        tags: ['Availability'],
+        summary: 'List dates that have at least one available slot for the requested duration',
+        parameters: [
+          {
+            name: 'durationMinutes',
+            in: 'query',
+            required: false,
+            description: 'Required treatment duration in minutes. Defaults to 30 minutes.',
+            schema: { type: 'integer', minimum: 1 },
+          },
+          {
+            name: 'treatment',
+            in: 'query',
+            required: false,
+            description: 'Name of the treatment to infer the duration from.',
+            schema: { type: 'string' },
+          },
+          {
+            name: 'startDate',
+            in: 'query',
+            required: false,
+            description: 'Starting date to search from (YYYY-MM-DD). Defaults to today.',
+            schema: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+          },
+          {
+            name: 'daysAhead',
+            in: 'query',
+            required: false,
+            description: 'How many days ahead to scan for availability. Defaults to 90.',
+            schema: { type: 'integer', minimum: 1, maximum: 365 },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Dates that have capacity for the requested duration.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/BookableDatesResponse' },
+              },
+            },
+          },
+          400: {
+            description: 'Invalid parameters.',
             content: {
               'application/json': { schema: { $ref: '#/components/schemas/ApiError' } },
             },
