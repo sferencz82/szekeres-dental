@@ -311,8 +311,11 @@ availabilityRouter.get(
     const treatmentDefinition =
       typeof treatment === 'string' ? getTreatmentDefinition(treatment) : undefined;
 
+    const parsedDuration = Number(durationMinutes);
     const requestedDuration =
-      treatmentDefinition?.time_required_in_minutes || Number(durationMinutes) || DEFAULT_DURATION_MINUTES;
+      (!Number.isNaN(parsedDuration) && parsedDuration > 0
+        ? parsedDuration
+        : treatmentDefinition?.time_required_in_minutes) || DEFAULT_DURATION_MINUTES;
 
     if (requestedDuration <= 0) {
       return res.status(400).json({

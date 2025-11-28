@@ -359,6 +359,8 @@ const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
   }
 
   const accessToken = await getServiceAccountAccessToken();
+  console.log(`Booking data: ${booking}`)
+  console.log(`Booking treatmentTime: ${booking.treatmentDurationMinutes}`)
   const { date: endDate, time: endTime } = formatDateTime(
     booking.date,
     booking.time,
@@ -448,11 +450,10 @@ appointmentsRouter.post(
     const matchedTreatment = getTreatmentDefinition(sanitizedTreatment);
     const requestedDuration = Number(req.body.treatmentDurationMinutes);
 
-    const resolvedTreatmentDurationMinutes = matchedTreatment?.time_required_in_minutes ??
+    const resolvedTreatmentDurationMinutes =
       (!Number.isNaN(requestedDuration) && requestedDuration > 0
         ? requestedDuration
-        : undefined) ??
-      defaultTreatmentDurationMinutes;
+        : matchedTreatment?.time_required_in_minutes ?? defaultTreatmentDurationMinutes);
 
     const parsedDate = new Date(`${date}T00:00:00Z`);
     if (Number.isNaN(parsedDate.getTime())) {
