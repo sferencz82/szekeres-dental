@@ -359,6 +359,8 @@ const createCalendarEvent = async (booking: BookingRequest): Promise<void> => {
   }
 
   const accessToken = await getServiceAccountAccessToken();
+  console.log(`Booking data: ${booking}`)
+  console.log(`Booking treatmentTime: ${booking.treatmentDurationMinutes}`)
   const { date: endDate, time: endTime } = formatDateTime(
     booking.date,
     booking.time,
