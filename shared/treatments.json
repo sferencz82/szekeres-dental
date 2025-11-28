@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Esztétikai fogászat",
+    "time_required_in_minutes": 75,
+    "basic_price_from": "48 000 Ft"
+  },
+  {
+    "name": "Bölcsességfog műtét",
+    "time_required_in_minutes": 90,
+    "basic_price_from": "65 000 Ft"
+  },
+  {
+    "name": "Gyökércsúcs rezekció",
+    "time_required_in_minutes": 60,
+    "basic_price_from": "95 000 Ft"
+  },
+  {
+    "name": "Implantológia",
+    "time_required_in_minutes": 120,
+    "basic_price_from": "260 000 Ft"
+  },
+  {
+    "name": "Fogpótlások, koronák, hidak",
+    "time_required_in_minutes": 90,
+    "basic_price_from": "120 000 Ft"
+  },
+  {
+    "name": "Szájhigiénés kezelések",
+    "time_required_in_minutes": 50,
+    "basic_price_from": "28 000 Ft"
+  },
+  {
+    "name": "Fogfehérítés",
+    "time_required_in_minutes": 90,
+    "basic_price_from": "85 000 Ft"
+  },
+  {
+    "name": "Sürgősségi ellátás",
+    "time_required_in_minutes": 30,
+    "basic_price_from": "35 000 Ft"
+  }
+]

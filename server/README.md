@@ -27,11 +27,19 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 | Variable           | Required | Description |
 | ------------------ | -------- | ----------- |
 | `PORT`             | No       | Port for the Express server (defaults to `4000`). |
+| `API_BASE_URL`     | No       | Overrides the base URL shown inside the generated Swagger docs. |
 | `CONTACT_TO_EMAIL` | Yes      | Where contact + booking messages are sent. |
 | `SMTP_HOST`        | Yes      | SMTP host used by Nodemailer. |
 | `SMTP_PORT`        | Yes      | SMTP port (`465` for SSL, otherwise STARTTLS). |
 | `SMTP_USER`        | Yes      | SMTP username or API key. |
 | `SMTP_PASS`        | Yes      | SMTP password / secret. |
+| `GOOGLE_CALENDAR_ID` | No     | Calendar ID that mirrors busy appointments. When set, `/api/availability` removes events returned by the Google Calendar API. |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | No | Service account credentials provided either as a **path** to the JSON key file, the raw JSON contents, or the base64-encoded JSON. |
+| `GOOGLE_CALENDAR_TIMEZONE` | No | Time zone applied when interpreting Google events (defaults to `Europe/Budapest`). |
+
+### Google Calendar powered availability
+
+If you already track appointments in a Google Calendar, you can surface its busy slots directly inside the booking form. Provide the calendar ID alongside a Google service account JSON key file (referenced by `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`) that has access to that calendar. The `/api/availability` endpoint will continue generating slots from the weekly office hours, but it now filters out entries that overlap with Google Calendar events and the booking endpoint will automatically write new appointments to the same calendar. Use `GOOGLE_CALENDAR_TIMEZONE` when your calendar operates outside of `Europe/Budapest`.
 
 ## Available scripts
 
@@ -47,3 +55,10 @@ Create a `.env` file (or copy [`server/.env.example`](./.env.example)) with:
 2. Update the frontend `.env` so `VITE_API_BASE_URL=http://localhost:4000` if you are not using the default.
 
 Logs are printed to stdout; unhandled errors return JSON `{ success: false, error: string }`.
+
+## API documentation
+
+- Human-friendly docs: <http://localhost:4000/api-docs>
+- Raw OpenAPI JSON: <http://localhost:4000/api-docs.json>
+
+The Swagger UI is automatically generated from the live routes and requires no extra tooling.

@@ -12,6 +12,8 @@ export interface AppointmentRequest {
   email: string;
   phone: string;
   treatment?: string;
+  treatmentPriceFrom?: string;
+  treatmentDurationMinutes?: number;
   date: string;
   time: string;
   note?: string;
