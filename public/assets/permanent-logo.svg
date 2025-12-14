@@ -1,0 +1,7 @@
+<svg width="220" height="52" viewBox="0 0 220 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1.5" y="1.5" width="49" height="49" rx="12" fill="#0FA6C7" stroke="#04212F" stroke-width="3"/>
+  <path d="M16 35.5C20.5 28.8 24 21 30 21C36.5 21 37 30 43.5 30C46.8 30 48.5 27.2 49 24" stroke="#04212F" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M18 18.5C20 14.5 23.5 12 27 12C33 12 35.5 18 41 18C43.5 18 45 16.8 45.8 15" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <text x="66" y="20" fill="#04212F" font-size="16" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-weight="700">Permanent</text>
+  <text x="66" y="40" fill="#0FA6C7" font-size="18" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-weight="700">Dental Care</text>
+</svg>

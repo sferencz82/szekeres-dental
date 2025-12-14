@@ -2,14 +2,14 @@
 
 :root {
   font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #0b1a4a;
-  background-color: #e9efff;
+  color: #0a1f2c;
+  background-color: #f2fbfb;
   line-height: 1.5;
-  --brand-dark: #081448;
-  --brand-mid: #2449ff;
-  --brand-light: #bcd7ff;
-  --brand-bg: #f2f6ff;
-  --brand-ink: #0b1a4a;
+  --brand-dark: #0a1f2c;
+  --brand-mid: #14b3c7;
+  --brand-light: #bdf1f6;
+  --brand-bg: #e8f9fb;
+  --brand-ink: #0a1f2c;
   --card-bg: rgba(255, 255, 255, 0.75);
 }
 
@@ -19,7 +19,7 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #f3f6ff 0%, #e3e9ff 45%, #dbe3ff 100%);
+  background: radial-gradient(circle at top, #f6fffe 0%, #e6f8fb 45%, #d9f3f7 100%);
   color: var(--brand-ink);
 }
 
@@ -113,21 +113,21 @@ main {
 }
 
 .btn-primary {
-  background: linear-gradient(120deg, #326dff, #7c9dff);
-  color: #fff;
-  box-shadow: 0 18px 35px rgba(50, 109, 255, 0.35);
+  background: linear-gradient(120deg, #0fa6c7, #1cd6c2);
+  color: #04212f;
+  box-shadow: 0 18px 35px rgba(12, 178, 199, 0.3);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.7);
   color: var(--brand-mid);
-  border: 1px solid rgba(50, 109, 255, 0.3);
+  border: 1px solid rgba(20, 179, 199, 0.3);
 }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.35);
   color: var(--brand-mid);
-  border: 1px solid rgba(50, 109, 255, 0.2);
+  border: 1px solid rgba(20, 179, 199, 0.22);
   padding: 0.95rem 1.6rem;
 }
 
@@ -136,11 +136,11 @@ main {
 }
 
 .section {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   margin: 2.5rem 0;
   padding: 3rem;
   border-radius: 32px;
-  box-shadow: 0 25px 60px rgba(8, 20, 72, 0.1);
+  box-shadow: 0 25px 60px rgba(10, 31, 44, 0.08);
 }
 
 .section.services {
@@ -162,7 +162,7 @@ main {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   font-size: 0.8rem;
-  color: #5d84ff;
+  color: #0fa6c7;
 }
 
 .hero {
@@ -170,7 +170,7 @@ main {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2.5rem;
   padding: 3.5rem;
-  background: radial-gradient(circle at top left, #f8fbff 0%, #e7edff 60%, #dee6ff 100%);
+  background: radial-gradient(circle at top left, #f8fffe 0%, #e6fafc 60%, #ddf4f7 100%);
   border-radius: 48px;
   margin-top: 2.5rem;
   position: relative;

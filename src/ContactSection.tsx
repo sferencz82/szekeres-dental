@@ -82,12 +82,12 @@ const ContactSection: React.FC = () => {
       <div className="contact__grid">
         <div className="contact__details">
           <h3>Elérhetőségek</h3>
-          <p>8000 Székesfehérvár, Budai út 70.</p>
+          <p>1137 Budapest, Radnóti Miklós utca 2.</p>
           <p>
-            Telefon: <a href="tel:+36705605074">+36 70 560 5074</a>
+            Telefon: <a href="tel:+36301234567">+36 30 123 4567</a>
           </p>
           <p>
-            E-mail: <a href="mailto:info@szekeresdental.hu">info@szekeresdental.hu</a>
+            E-mail: <a href="mailto:hello@permanentdentalcare.hu">hello@permanentdentalcare.hu</a>
           </p>
           <div className="opening-hours">
             <h4>Rendelési idő</h4>
@@ -103,8 +103,8 @@ const ContactSection: React.FC = () => {
           </div>
           <div className="map">
             <iframe
-              title="Szekeres Dental térkép"
-              src="https://www.google.com/maps?q=8000+Sz%C3%A9kesfeh%C3%A9rv%C3%A1r%2C+Budai+%C3%BAt+70&output=embed"
+              title="Permanent Dental Care térkép"
+              src="https://www.google.com/maps?q=1137+Budapest%2C+Radn%C3%B3ti+Mikl%C3%B3s+utca+2&output=embed"
               width="100%"
               height="250"
               loading="lazy"
@@ -115,7 +115,7 @@ const ContactSection: React.FC = () => {
             <p className="map__caption">
               A térkép a rendelő pontos helyét mutatja. Ha nem tölt be, nyissa meg a{' '}
               <a
-                href="https://www.google.com/maps/place/8000+Sz%C3%A9kesfeh%C3%A9rv%C3%A1r,+Budai+%C3%BAt+70/"
+                href="https://www.google.com/maps/place/1137+Budapest,+Radn%C3%B3ti+Mikl%C3%B3s+utca+2/"
                 target="_blank"
                 rel="noreferrer"
               >

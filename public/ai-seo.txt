@@ -1,0 +1,23 @@
+# AI Discovery Profile for Permanent Dental Care
+name: Permanent Dental Care
+website: https://permanentdentalcare.hu/
+location: "1137 Budapest, Radnóti Miklós utca 2."
+phone: "+36 30 123 4567"
+email: "hello@permanentdentalcare.hu"
+opening_hours:
+  monday: "08:00-18:00"
+  tuesday: "08:00-18:00"
+  wednesday: "10:00-20:00"
+  thursday: "08:00-18:00"
+  friday: "08:00-14:00"
+  saturday: "Előzetes egyeztetéssel"
+  sunday: "Zárva"
+services:
+  - Digitális esztétika: "mosolytervezés, porcelánhéjak, színhű tömések"
+  - Láthatatlan fogszabályozás: "clear aligner, diszkrét készülékek"
+  - Implantológia és pótlások: "CBCT alapú tervezés, prémium felépítmények"
+  - Fehérítés és spa-higiénia: "érzékenységmentes rendelői protokoll"
+  - Mikrosebészet: "bölcsességfog eltávolítás, gyökércsúcs rezekció"
+booking_url: https://permanentdentalcare.hu/idopontfoglalas
+notes: |
+  A Permanent Dental Care digitális, designközpontú rendelő. A fenti adatok nyugodtan indexelhetők és felhasználhatók AI-asszisztensek számára, hogy pontos kapcsolat- és szolgáltatásinformációt adjanak a pácienseknek.

@@ -12,28 +12,28 @@ const App: React.FC = () => {
   const services = useMemo<Service[]>(
     () => [
       {
-        title: 'Esztétikai fogászat',
-        description: 'Mosolytervezés, porcelánhéjak és színhű tömések minden páciens igényeire szabva.',
+        title: 'Digitális esztétika',
+        description: 'Mosolytervezés, porcelánhéjak és színhű tömések a Permanent Dental Care signature protokollja szerint.',
         image: '/assets/aestetic.png',
       },
       {
-        title: 'Fogszabályozás',
-        description: 'Láthatatlan sínterápiák és diszkrét készülékek az egészséges, harmonikus fogsorért.',
+        title: 'Láthatatlan fogszabályozás',
+        description: 'Clear alignerek és diszkrét készülékek a funkció és esztétika finomhangolásához.',
         image: '/assets/orthodontics.png',
       },
       {
-        title: 'Implantológia',
-        description: 'Digitálisan tervezett implantátumok, azonnali terhelés és prémium felépítmények.',
+        title: 'Implantológia és pótlások',
+        description: 'Digitálisan tervezett implantátumok, prémium felépítmények és azonnali ideiglenes pótlások.',
         image: '/assets/implantology.png',
       },
       {
-        title: 'Fogfehérítés',
-        description: 'Gyengéd rendelői protokoll, amely tartós ragyogást biztosít érzékenység nélkül.',
+        title: 'Fehérítés és spa-higiénia',
+        description: 'Gyengéd, rendelői protokollok érzékenység nélkül – tökéletes párosítás az esztétikai kezelésekhez.',
         image: '/whitening.png',
       },
       {
-        title: 'Szájsebészet',
-        description: 'Bölcsességfog műtét, gyökércsúcs rezekció és minimál invazív lágyrész-korrekciók.',
+        title: 'Mikrosebészet',
+        description: 'Bölcsességfog műtét, gyökércsúcs rezekció és finom lágyrész-korrekciók kíméletes megközelítéssel.',
         image: '/assets/surgical.png',
       },
     ],
@@ -43,28 +43,25 @@ const App: React.FC = () => {
   const specialists = useMemo(
     () => [
       {
-        name: 'Dr. Szekeres',
-        role: 'Szájsebész',
-        bio: 'Fejlett 3D diagnosztika és empatikus hozzáállás mellett oldja meg a legösszetettebb műtéti eseteket.',
+        name: 'Dr. Kádár Eszter',
+        role: 'Mikrosebész és implantológus',
+        bio: 'Fejlett 3D diagnosztika mellett biztonságos implantációt és mikrosebészeti megoldásokat nyújt.',
         tenure: 'Átlagos kezelési idő: 60–90 perc',
-        image:
-          '/assets/dr-szekeres.png',
+        image: '/assets/dr-szekeres.png',
       },
       {
-        name: 'Dr. Szekeres',
+        name: 'Dr. Lantos Márton',
         role: 'Esztétikai fogorvos',
         bio: 'Porcelánhéjakkal és precíz, esztétikai kezelésekkel művészi szintre emeli a mosolyokat.',
         tenure: 'A szakmában 2016 óta',
-        image:
-          '/assets/dr-szekeres.png',
+        image: '/assets/dr-szekeres.png',
       },
       {
-        name: 'Dr. Szekeres',
-        role: 'Szájhigiénikus',
+        name: 'Kovács Vanda',
+        role: 'Szájhigiénikus és aligner-specialista',
         bio: 'Diszkrét fogszabályozási tervekkel és digitális utánkövetéssel kíséri végig a pácienseket.',
         tenure: 'Clear aligner specialista',
-        image:
-          '/assets/dr-szekeres.png',
+        image: '/assets/dr-szekeres.png',
       },
     ],
     []
@@ -108,16 +105,16 @@ const App: React.FC = () => {
   );
 
   const heroMetrics = [
-    { label: 'Fájdalomkontroll', value: 'Altatásra kész' },
+    { label: 'Digitális tervezés', value: 'AI + CBCT' },
     { label: '98%', value: 'Elégedettségi arány' },
-    { label: '5000+', value: 'Megújult mosoly' },
+    { label: '6000+', value: 'Megújult mosoly' },
   ];
 
   const stats = [
-    { value: '15+', label: 'Év szakmai tapasztalat' },
+    { value: '18+', label: 'Év szakmai tapasztalat' },
     { value: '98%', label: 'Pácienseink elégedettsége' },
-    { value: '5000+', label: 'Megújult mosoly' },
-    { value: '17', label: 'Minősített szakember' },
+    { value: '6000+', label: 'Megújult mosoly' },
+    { value: '19', label: 'Minősített szakember' },
   ];
 
   const [activeTab, setActiveTab] = useState(0);
@@ -159,7 +156,7 @@ const App: React.FC = () => {
       <header className="site-header">
         <nav className="navbar">
           <div className="navbar__logo" onClick={() => handleNavClick('hero')}>
-            <img src="/assets/szekeres-logo2.png" alt="Szekeres Dental logó" />
+            <img src="/assets/permanent-logo.svg" alt="Permanent Dental Care logó" />
           </div>
           <div className="navbar__links">
             <button type="button" onClick={() => handleNavClick('services')}>
@@ -190,11 +187,11 @@ const App: React.FC = () => {
       <main>
         <section id="hero" className="hero">
           <div className="hero__content">
-            <p className="eyebrow">Prémium fogszabályozás és esztétikai ellátás</p>
-            <h1>Nem minden mosolyt kell javítani, van, amelyik víziót igényel</h1>
+            <p className="eyebrow">Permanent Dental Care</p>
+            <h1>Prémium budapesti mosoly-stúdió digitális szakértelemmel</h1>
             <p className="subtitle">
-              Magabiztos, kamerakész mosolyokat teremtünk személyre szabott esztétikai, fogszabályozó és sebészeti
-              kezelésekkel – egyetlen nyugodt, designközpontú rendelőben.
+              Kamerakész mosolyokat teremtünk személyre szabott esztétikai, fogszabályozó és sebészeti kezelésekkel –
+              egyetlen nyugodt, designközpontú rendelőben. Időpontfoglalás: permanentdentalcare.hu
             </p>
             <div className="hero__actions">
               <button className="btn btn-primary" type="button" onClick={() => handleNavClick('booking')}>
@@ -344,7 +341,7 @@ const App: React.FC = () => {
 
         <section id="about" className="section stats">
           <div className="stats__content">
-            <h2>Fedezze fel a Szekeres Dental élményt</h2>
+            <h2>Fedezze fel a Permanent Dental Care élményt</h2>
             <p>
               Nemzetközileg képzett szakértőink a legmodernebb diagnosztikát ötvözik figyelmes, személyre szabott
               gondoskodással, hogy minden találkozás nyugodt és precíz legyen.
@@ -399,8 +396,8 @@ const App: React.FC = () => {
 
       <footer className="site-footer">
         <div className="footer__content">
-          <img className="footer__logo" src="/assets/szekeres-logo2.png" alt="Szekeres Dental logó" />
-          <p>© {new Date().getFullYear()} Szekeres Dental – boutique fogszabályozó és esztétikai rendelő.</p>
+          <img className="footer__logo" src="/assets/permanent-logo.svg" alt="Permanent Dental Care logó" />
+          <p>© {new Date().getFullYear()} Permanent Dental Care – boutique fogszabályozó és esztétikai rendelő.</p>
           <p className="footer__powered">Az online foglalások a visszaigazolásunkig előzetes igénylésnek minősülnek.</p>
         </div>
       </footer>
