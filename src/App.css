@@ -60,6 +60,7 @@ main {
   max-width: 1180px;
   margin: 0 auto;
   gap: 1.5rem;
+  position: relative;
 }
 
 .navbar__logo {
@@ -82,6 +83,42 @@ main {
   flex-wrap: wrap;
   font-weight: 600;
   color: #4c5da3;
+}
+
+.navbar__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid rgba(36, 73, 255, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 10px;
+  gap: 5px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.navbar__toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: #1b2c68;
+  border-radius: 999px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar__toggle.is-open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.navbar__toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar__toggle.is-open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 .navbar__links button {
@@ -919,12 +956,43 @@ main {
 
 @media (max-width: 900px) {
   .navbar {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .navbar__links {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: calc(100% - 2rem);
+    position: absolute;
+    top: calc(100% - 0.25rem);
+    left: 1rem;
+    right: 1rem;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(36, 73, 255, 0.15);
+    box-shadow: 0 25px 40px rgba(10, 44, 89, 0.15);
+    z-index: 20;
+  }
+
+  .navbar__links.is-open {
+    display: flex;
+  }
+
+  .navbar__links button {
     width: 100%;
+    text-align: left;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .navbar__links button:hover {
+    background: rgba(36, 73, 255, 0.06);
+  }
+
+  .navbar__toggle {
+    display: inline-flex;
   }
 
   .hero {

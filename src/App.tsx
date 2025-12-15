@@ -120,12 +120,15 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [sliderValue, setSliderValue] = useState(50);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleNavClick = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth' });
     }
+
+    setIsMenuOpen(false);
   };
 
   const handleServiceClick = (service: Service) => {
@@ -158,7 +161,17 @@ const App: React.FC = () => {
           <div className="navbar__logo" onClick={() => handleNavClick('hero')}>
             <img src="/assets/permanent-logo.svg" alt="Permanent Dental Care logó" />
           </div>
-          <div className="navbar__links">
+          <button
+            type="button"
+            className={`navbar__toggle ${isMenuOpen ? 'is-open' : ''}`}
+            aria-label="Menü megnyitása"
+            onClick={() => setIsMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className={`navbar__links ${isMenuOpen ? 'is-open' : ''}`}>
             <button type="button" onClick={() => handleNavClick('services')}>
               Szolgáltatásaink
             </button>
